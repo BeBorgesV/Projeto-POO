@@ -1,6 +1,6 @@
 package model;
 
-/** Os três tipos de peça de tributo que ficam nas províncias (manual, p. 8). */
+/** Os três tipos de peça de tributo que ficam nas províncias. */
 enum TipoTributo {
 	/** Permite atacar cidades. */
 	ESPADA,

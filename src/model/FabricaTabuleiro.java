@@ -5,9 +5,9 @@ import java.util.Random;
 /**
  * Monta o tabuleiro.
  *
- * ATENÇÃO: este é um MAPA DE EXEMPLO, pequeno, para desenvolver e testar as
- * regras. O grupo precisa transcrever o tabuleiro real (todas as paradas,
- * rotas, províncias, cidades e conselheiros) em {@link #criarTabuleiroOficial}.
+ * Por enquanto só existe um mapa de exemplo, pequeno, para testar as regras.
+ * TODO: passar o tabuleiro real (paradas, rotas, províncias, cidades e
+ * conselheiros) para um novo método aqui.
  *
  * <pre>
  *                 [Kiev]           [Sarai]
@@ -66,10 +66,5 @@ final class FabricaTabuleiro {
 		t.prepararCidades();
 		t.prepararProvincias();
 		return t;
-	}
-
-	/** TODO (grupo): transcrever o tabuleiro real do Herdeiros do Khan. */
-	static Tabuleiro criarTabuleiroOficial(Random sorteio) {
-		throw new UnsupportedOperationException("Tabuleiro oficial ainda não transcrito");
 	}
 }

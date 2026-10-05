@@ -73,4 +73,18 @@ public class KhanTest {
 	public void colunaComKhanNaoDeixaEncerrarSemUsarOKhan() {
 		jogo.encerrarTurno();
 	}
+
+	@Test(timeout = DEFAULT_TIMEOUT, expected = JogadaInvalidaException.class)
+	public void colunaSemIconeDoKhanNaoDeixaUsarOKhan() {
+		jogo.moverKhan("Estepe");
+		jogo.encerrarTurno();
+		jogo.iniciarTurno(0, 0, false);
+		jogo.moverKhan("Montanha");
+	}
+
+	@Test(timeout = DEFAULT_TIMEOUT, expected = JogadaInvalidaException.class)
+	public void khanSoPodeSerUsadoUmaVezPorTurno() {
+		jogo.moverKhan("Estepe");
+		jogo.moverKhan("Montanha");
+	}
 }

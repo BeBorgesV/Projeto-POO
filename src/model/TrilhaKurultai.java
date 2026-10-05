@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Trilha do Kurultai (manual, p. 14).
+ * Trilha do Kurultai.
  *
  * Cada voto ganho avança a ficha do jogador e também a ficha neutra, que marca
  * a lotação do conselho. Quando a ficha neutra atinge o limite para o número de
@@ -33,7 +33,7 @@ class TrilhaKurultai {
 	}
 
 	void registrarVotos(Jogador j, int quantidade) {
-		votos.merge(j, quantidade, Integer::sum);
+		votos.put(j, votosDe(j) + quantidade);
 		fichaNeutra += quantidade;
 	}
 

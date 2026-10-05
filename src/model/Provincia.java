@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Área entre as rotas onde ficam as peças de tributo (manual, p. 5).
+ * Área entre as rotas onde ficam as peças de tributo.
  *
  * Cada província tem um ícone que diz qual tipo de tributo ela recebe.
  * As províncias do Khan têm setas apontando para 2 províncias vizinhas,
- * que também recebem tributo quando o Khan chega (manual, p. 9).
+ * que também recebem tributo quando o Khan chega.
  */
 class Provincia implements AreaDoMapa {
 	static final int MAX_PECAS = 3;

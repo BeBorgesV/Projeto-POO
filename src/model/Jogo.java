@@ -44,7 +44,7 @@ public class Jogo {
 	// ================= PREPARAÇÃO =================
 
 	/**
-	 * Prepara uma partida (manual, p. 3 e 4). A ordem das cores é a ordem de jogo.
+	 * Prepara uma partida. A ordem das cores é a ordem de jogo.
 	 * O 1º e o 2º começam com 1 moeda, os demais com 2; todos os peões começam
 	 * em Karakorum.
 	 */
@@ -85,7 +85,7 @@ public class Jogo {
 		turno = new Turno(daVez(), movimentos, acoesDeTributo, colunaTemKhan);
 	}
 
-	/** Passa a vez. O peão precisa terminar numa parada onde caiba (manual, p. 7). */
+	/** Passa a vez. O peão precisa terminar numa parada onde caiba. */
 	public void encerrarTurno() {
 		Turno t = exigirTurno();
 		if (!t.jogador().posicao().cabePeaoDe(t.jogador())) {
@@ -102,7 +102,7 @@ public class Jogo {
 	// ================= AÇÕES DA COLUNA =================
 
 	/**
-	 * Move o peão para {@code destino} gastando 1 movimento (manual, p. 7).
+	 * Move o peão para {@code destino} gastando 1 movimento.
 	 *
 	 * O destino precisa ser vizinho da posição atual, ou alcançável passando só
 	 * por paradas com yurt do próprio jogador (o yurt permite pular a parada).
@@ -149,7 +149,7 @@ public class Jogo {
 
 	/**
 	 * Pega 1 peça de tributo de uma província vizinha a alguma parada por onde
-	 * o peão passou neste turno (manual, p. 8).
+	 * o peão passou neste turno.
 	 */
 	public void pegarTributo(String provincia) {
 		Turno t = exigirTurno();
@@ -175,12 +175,13 @@ public class Jogo {
 	}
 
 	/**
-	 * Move o Khan (manual, p. 9). Numa província do Khan, ela e as 2 províncias
+	 * Move o Khan. Numa província do Khan, ela e as 2 províncias
 	 * apontadas pelas setas recebem 1 tributo cada (máximo 3 por província).
 	 * Use {@code "MELHORIAS"} para a área de melhorias.
 	 */
 	public void moverKhan(String destino) {
 		Turno t = exigirTurno();
+		t.exigirKhanDisponivel();
 		if (Khan.AREA_DE_MELHORIAS.equalsIgnoreCase(destino)) {
 			khan.moverPara(Khan.AREA_DE_MELHORIAS);
 			// TODO (iteração futura): revelar novas melhorias e pegar moeda/espada da área.
@@ -201,7 +202,7 @@ public class Jogo {
 	// ================= AÇÕES EXTRAS (a qualquer momento do turno) =================
 
 	/**
-	 * Toma 1 tesouro de uma cidade vizinha a uma parada deste turno (manual, p. 10).
+	 * Toma 1 tesouro de uma cidade vizinha a uma parada deste turno.
 	 * O 1º tesouro da cidade no turno custa 1 espada; os seguintes, 2 cada.
 	 * Quem toma o último tesouro conquista a cidade: um yurt seu vai para o meio
 	 * dela e a próxima cidade da pilha é revelada.
@@ -226,6 +227,7 @@ public class Jogo {
 
 		if (c.quantidadeDeTesouros() == 0) {
 			c.registrarConquista(j);
+			// se o jogador não tiver mais yurts, conquista a cidade mesmo assim
 			if (j.yurtsDisponiveis() > 0) {
 				j.usarYurt();
 			}
@@ -235,7 +237,7 @@ public class Jogo {
 
 	/**
 	 * Gasta 1 peça de tributo de yurt para construir um yurt numa parada por
-	 * onde o peão passou neste turno (manual, p. 11). Não vale em Karakorum nem
+	 * onde o peão passou neste turno. Não vale em Karakorum nem
 	 * onde já houver yurt (a parada dupla aceita 2).
 	 */
 	public void construirYurt(String parada) {

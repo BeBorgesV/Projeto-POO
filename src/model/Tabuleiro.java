@@ -61,7 +61,7 @@ class Tabuleiro {
 		return c;
 	}
 
-	// ---------- preparação (manual, p. 3 e 4) ----------
+	// ---------- preparação ----------
 
 	/** Embaralha as peças de cidade e revela as 3 primeiras, cada uma com 4 tesouros. */
 	void prepararCidades() {
@@ -80,7 +80,7 @@ class Tabuleiro {
 		}
 	}
 
-	/** Revela a próxima cidade da pilha. Se a pilha acabou, não faz nada (manual, p. 10). */
+	/** Revela a próxima cidade da pilha. Se a pilha acabou, não faz nada. */
 	Cidade revelarProximaCidade() {
 		if (pilhaDeCidades.isEmpty()) {
 			return null;

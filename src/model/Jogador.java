@@ -13,10 +13,7 @@ class Jogador {
 	private final Map<TipoTesouro, Integer> tesouros = new HashMap<>();
 	private int yurtsDisponiveis = YURTS_INICIAIS;
 
-	/**
-	 * @param moedasIniciais 1 para o 1º e o 2º a jogar, 2 para os demais
-	 *                       (manual, p. 3).
-	 */
+	// moedasIniciais: 1 para o 1º e o 2º a jogar, 2 para os demais
 	Jogador(String cor, int moedasIniciais) {
 		this.cor = cor;
 		for (TipoTributo t : TipoTributo.values()) {
@@ -65,7 +62,7 @@ class Jogador {
 	// ---------- tesouros ----------
 
 	void receberTesouro(TipoTesouro tipo) {
-		tesouros.merge(tipo, 1, Integer::sum);
+		tesouros.put(tipo, tesouros(tipo) + 1);
 	}
 
 	int tesouros(TipoTesouro tipo) {

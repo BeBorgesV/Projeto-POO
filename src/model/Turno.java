@@ -78,16 +78,26 @@ class Turno {
 
 	// ---------- ataque ----------
 
-	/** O 1º tesouro de uma cidade no turno custa 1 espada; cada seguinte custa 2 (manual, p. 10). */
+	/** O 1º tesouro de uma cidade no turno custa 1 espada; cada seguinte custa 2. */
 	int custoEmEspadas(Cidade c) {
 		return tesourosTomados.getOrDefault(c, 0) == 0 ? 1 : 2;
 	}
 
 	void registrarTesouroTomado(Cidade c) {
-		tesourosTomados.merge(c, 1, Integer::sum);
+		tesourosTomados.put(c, tesourosTomados.getOrDefault(c, 0) + 1);
 	}
 
 	// ---------- Khan ----------
+
+	/** O Khan só pode ser usado se a coluna tiver o ícone, e uma vez por turno. */
+	void exigirKhanDisponivel() {
+		if (!khanObrigatorio) {
+			throw new JogadaInvalidaException("A coluna ativada não tem o ícone do Khan");
+		}
+		if (khanUsado) {
+			throw new JogadaInvalidaException("O Khan já foi usado neste turno");
+		}
+	}
 
 	void registrarUsoDoKhan() {
 		khanUsado = true;

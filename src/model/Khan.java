@@ -1,7 +1,7 @@
 package model;
 
 /**
- * O peão do Genghis Khan (manual, p. 9).
+ * O peão do Genghis Khan.
  *
  * Começa fora do tabuleiro. Pode ir para uma das províncias do Khan ou para
  * a área de melhorias, mas nunca pode ficar onde já está.

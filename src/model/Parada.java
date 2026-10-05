@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Um ponto de parada nas rotas do mapa (manual, p. 5 e 7).
+ * Um ponto de parada nas rotas do mapa.
  *
  * Parada simples: 1 peão e 1 yurt. Parada dupla (onde ficam os conselheiros):
  * 2 peões e até 2 yurts. Karakorum: todos os peões e nenhum yurt.

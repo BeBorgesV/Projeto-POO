@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Cidade do mapa, fonte de tesouros (manual, p. 5 e 10).
+ * Cidade do mapa, fonte de tesouros.
  *
  * Só as cidades reveladas podem ser atacadas. Quem toma o último tesouro
  * conquista a cidade e coloca um yurt seu no meio dela.
@@ -71,10 +71,6 @@ class Cidade implements AreaDoMapa {
 			throw new JogadaInvalidaException(nome + " não tem tesouro do tipo " + tipo);
 		}
 		return tipo;
-	}
-
-	boolean foiConquistada() {
-		return conquistador != null;
 	}
 
 	Jogador conquistador() {
