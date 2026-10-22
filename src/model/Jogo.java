@@ -15,31 +15,44 @@ import java.util.Set;
  * É a única classe pública do pacote (fora a exceção): View e Controller só
  * falam com as regras por aqui, e recebem apenas textos e números, nunca os
  * objetos internos. Na 3ª iteração esta classe vira Singleton + Façade.
+ * 
+ * aplicado padrão singleton (façade já estava aplicado)
  *
  * Fluxo de um turno: {@link #iniciarTurno} → ações ({@link #mover},
  * {@link #pegarTributo}, {@link #atacarCidade}, {@link #construirYurt},
  * {@link #moverKhan}) em qualquer ordem → {@link #encerrarTurno}.
  */
 public class Jogo {
-	static final int MIN_JOGADORES = 2;
-	static final int MAX_JOGADORES = 5;
+    static final int MIN_JOGADORES = 2;
+    static final int MAX_JOGADORES = 5;
 
-	private final Random sorteio;
-	private final List<Jogador> jogadores = new ArrayList<>();
-	private Tabuleiro tabuleiro;
-	private Khan khan;
-	private TrilhaKurultai kurultai;
-	private int indiceDaVez;
-	private Turno turno;
+    // 1. Instância única do Singleton
+    private static final Jogo INSTANCIA = new Jogo();
 
-	public Jogo() {
-		this(new Random());
-	}
+    private final Random sorteio;
+    private final List<Jogador> jogadores = new ArrayList<>();
+    private Tabuleiro tabuleiro;
+    private Khan khan;
+    private TrilhaKurultai kurultai;
+    private int indiceDaVez;
+    private Turno turno;
 
-	/** Usado nos testes, com semente fixa, para o sorteio ser previsível. */
-	Jogo(Random sorteio) {
-		this.sorteio = sorteio;
-	}
+    // 2. Construtor privado para impedir novas instâncias via 'new'
+    private Jogo() {
+        this.sorteio = new Random();
+    }
+
+    /** Construtor para testes, permitindo semente fixa no Random. */
+    Jogo(Random sorteio) {
+        this.sorteio = sorteio;
+    }
+
+    /** 
+     * 3. Ponto de acesso global para obter a única instância do Jogo (Singleton).
+     */
+    public static Jogo obterInstancia() {
+        return INSTANCIA;
+    }
 
 	// ================= PREPARAÇÃO =================
 

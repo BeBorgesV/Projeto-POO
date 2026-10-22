@@ -54,19 +54,20 @@ public class PreparacaoTest {
 	public void cadaJogadorComecaComDozeYurts() {
 		assertEquals("Yurts guardados no início", 12, jogo.yurtsDisponiveisDe("AZUL"));
 	}
-
+	
+	// funções abaixo alteradas para se adequar ao modelo singleton!
 	@Test(timeout = DEFAULT_TIMEOUT, expected = JogadaInvalidaException.class)
 	public void partidaComUmSoJogadorLancaExcecao() {
-		new Jogo().iniciarPartida("VERMELHO");
+		Jogo.obterInstancia().iniciarPartida("VERMELHO");
 	}
 
 	@Test(timeout = DEFAULT_TIMEOUT, expected = JogadaInvalidaException.class)
 	public void partidaComSeisJogadoresLancaExcecao() {
-		new Jogo().iniciarPartida("A", "B", "C", "D", "E", "F");
+		Jogo.obterInstancia().iniciarPartida("A", "B", "C", "D", "E", "F");
 	}
 
 	@Test(timeout = DEFAULT_TIMEOUT, expected = JogadaInvalidaException.class)
 	public void doisJogadoresComAMesmaCorLancaExcecao() {
-		new Jogo().iniciarPartida("VERMELHO", "VERMELHO");
+		Jogo.obterInstancia().iniciarPartida("VERMELHO", "VERMELHO");
 	}
 }
