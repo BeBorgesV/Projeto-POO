@@ -4,8 +4,10 @@ Trabalho de POO (prof. Ivan Mathias Filho), 2026.2.
 
 Integrantes:
 - Bernardo Borges Vieira - 2211838
+- Ian Siqueira Matielo Moura - 2310643
 - (completar)
-- (completar)
+
+PASTA COM AS IMAGENS A SEREM ADICIONADAS NA PASTA IMAGES: https://drive.google.com/drive/folders/17Jtg_bu90KbPdT2hoqx60qx4Oskz6ZYV?usp=sharing
 
 ## Como rodar
 
