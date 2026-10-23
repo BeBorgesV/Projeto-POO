@@ -8,6 +8,7 @@ Integrantes:
 - (completar)
 
 PASTA COM AS IMAGENS A SEREM ADICIONADAS NA PASTA IMAGES: https://drive.google.com/drive/folders/17Jtg_bu90KbPdT2hoqx60qx4Oskz6ZYV?usp=sharing
+*vou colocar o projeto inteiro lá também caso tenha problema
 
 ## Como rodar
 
