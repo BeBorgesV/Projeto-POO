@@ -22,12 +22,13 @@ import java.util.Set;
  * {@link #pegarTributo}, {@link #atacarCidade}, {@link #construirYurt},
  * {@link #moverKhan}) em qualquer ordem → {@link #encerrarTurno}.
  */
+
 public class Jogo {
     static final int MIN_JOGADORES = 2;
     static final int MAX_JOGADORES = 5;
-
+    
     // 1. Instância única do Singleton
-    private static final Jogo INSTANCIA = new Jogo();
+    private static final Jogo INSTANCIA = new Jogo(); //nao esta que nem no slide, não sei se está 100% correto
 
     private final Random sorteio;
     private final List<Jogador> jogadores = new ArrayList<>();
@@ -277,6 +278,15 @@ public class Jogo {
 		exigirPartida();
 		return daVez().cor();
 	}
+	
+	public List<String> obterCoresJogadores() {
+        exigirPartida();
+        List<String> cores = new ArrayList<>();
+        for (Jogador j : jogadores) {
+            cores.add(j.cor());
+        }
+        return cores;
+    }
 
 	public String posicaoDe(String cor) {
 		return jogador(cor).posicao().nome();

@@ -12,7 +12,6 @@ public class JanelaJogo extends JFrame {
     private JLabel labelJogadorDaVez;
 
     public JanelaJogo() {
-        // Configurações básicas da janela (Respeita o limite máximo de 1400x1050)
         setTitle("Herdeiros do Khan");
         setSize(1200, 850);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

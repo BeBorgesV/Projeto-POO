@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 import model.Jogo; // importa a fachada do Model
 
 public class PainelTabuleiro extends JPanel {
@@ -15,11 +16,21 @@ public class PainelTabuleiro extends JPanel {
     private static final long serialVersionUID = 1L;
     
     private BufferedImage imagemTabuleiro;
-    private Map<String, Point> coordenadasParadas;
+    private Map<String, Point> coordenadasParadas; // colocar parada
 
     public PainelTabuleiro() {
         carregarImagens();
         inicializarCoordenadas();
+
+        // pra descobrir as coordenadas das paradas:
+        this.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                int x = e.getX();
+                int y = e.getY();
+                System.out.println("Coordenadas clicadas -> X: " + x + ", Y: " + y);
+            }
+        });
     }
 
     private void carregarImagens() {
@@ -31,19 +42,28 @@ public class PainelTabuleiro extends JPanel {
         }
     }
     
-    private void inicializarCoordenadas() {  //AJUSTAR PARA FICAR QUE NEM NO TABULEIRO
+    private void inicializarCoordenadas() {  
         coordenadasParadas = new HashMap<>();
         
-        // AJUSTADA JÁ
+        // Posição central (Karakorum)
         coordenadasParadas.put("Karakorum", new Point(585, 360)); 
         
-        // PARADAS AINDA NAO ESTAO CORRETAS
-        coordenadasParadas.put("P1", new Point(350, 300));
-        coordenadasParadas.put("P2", new Point(450, 300));
-        coordenadasParadas.put("P3", new Point(550, 300));
-        coordenadasParadas.put("P4", new Point(400, 200));
-        coordenadasParadas.put("P5", new Point(600, 200));
-        coordenadasParadas.put("P6", new Point(700, 200));
+        // paradas da regiao amarela (numeradas de acordo com uma imagem)
+        coordenadasParadas.put("P1", new Point(50, 136));
+        coordenadasParadas.put("P2", new Point(200, 64));
+        coordenadasParadas.put("P3", new Point(190, 142));
+        coordenadasParadas.put("P4_DUPLA1", new Point(348, 43));
+        coordenadasParadas.put("P4_DUPLA2", new Point(378, 63));
+        coordenadasParadas.put("P5", new Point(350, 146));
+        coordenadasParadas.put("P6", new Point(441, 222));
+        coordenadasParadas.put("P7", new Point(518, 129));
+        coordenadasParadas.put("P8", new Point(635, 175));
+        coordenadasParadas.put("P9", new Point(714, 61));
+        coordenadasParadas.put("P10", new Point(766, 157));
+        coordenadasParadas.put("P11_DUPLA1", new Point(890, 129));
+        coordenadasParadas.put("P11_DUPLA2", new Point(935, 130));
+        
+        //fazer resto dps
     }
 
     @Override
@@ -51,9 +71,7 @@ public class PainelTabuleiro extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        // 1. OBRIGATÓRIO: Desenhar a imagem do tabuleiro usando drawImage
         if (imagemTabuleiro != null) {
-            // Desenha a imagem preenchendo o painel (ou nas dimensões originais)
             g2d.drawImage(imagemTabuleiro, 0, 0, getWidth(), getHeight(), this);
         } else {
             g2d.setColor(Color.LIGHT_GRAY);
@@ -61,17 +79,20 @@ public class PainelTabuleiro extends JPanel {
             g2d.setColor(Color.RED);
             g2d.drawString("Erro: 'tabuleiro.jpg' não encontrada na pasta resources/", 30, 30);
         }
-
-        // 2. OBRIGATÓRIO: Desenhar os peões consultando o Model e usando Java2D
         desenharPaoesDosJogadores(g2d);
     }
 
-    private void desenharPaoesDosJogadores(Graphics2D g2d) { // ver qnts jogadores
+    private void desenharPaoesDosJogadores(Graphics2D g2d) {
         try {
-            String[] coresJogadores = {"Vermelho", "Azul", "Verde"};
+            // Pede dinamicamente ao Model a lista de cores de todos os jogadores da partida
+            List<String> coresJogadores = Jogo.obterInstancia().obterCoresJogadores();
             
-            // Variável para espalhar os peões caso estejam na mesma casa
-            int deslocamentoX = -40; 
+            if (coresJogadores == null || coresJogadores.isEmpty()) {
+                return;
+            }
+
+            int totalJogadores = coresJogadores.size();
+            int indice = 0;
 
             for (String cor : coresJogadores) {
                 try {
@@ -79,28 +100,34 @@ public class PainelTabuleiro extends JPanel {
                     Point ponto = coordenadasParadas.get(nomeParadaAtual);
 
                     if (ponto != null) {
-                        // Define a cor e ajusta a posição horizontal para não ficarem colados no mesmo pixel
+                        // Define a cor visual do peão com base na string da cor do jogador
                         if (cor.equalsIgnoreCase("Vermelho")) {
                             g2d.setColor(Color.RED);
                         } else if (cor.equalsIgnoreCase("Azul")) {
                             g2d.setColor(Color.CYAN);
-                            deslocamentoX = 0; // peão do meio
-                        } else {
+                        } else if (cor.equalsIgnoreCase("Verde")) {
                             g2d.setColor(Color.GREEN);
-                            deslocamentoX = 40; // peão da direita
+                        } else if (cor.equalsIgnoreCase("Amarelo")) {
+                            g2d.setColor(Color.YELLOW);
+                        } else {
+                            g2d.setColor(Color.MAGENTA); // Cor extra para 5º jogador (ex: Roxo/Rosa)
                         }
 
-                        // Desenha o peão com o deslocamento aplicado
-                        g2d.fillOval(ponto.x + deslocamentoX - 6, ponto.y - 6, 25, 25);
+                        // CÁLCULO DINÂMICO DE ESPALHAMENTO:
+                        int deslocamentoX = (indice - (totalJogadores / 2)) * 28;
+
+                        // Desenha o peão preenchido e com borda preta
+                        g2d.fillOval(ponto.x + deslocamentoX - 8, ponto.y - 8, 22, 22);
                         g2d.setColor(Color.BLACK);
-                        g2d.drawOval(ponto.x + deslocamentoX - 6, ponto.y - 6, 25, 25);
+                        g2d.drawOval(ponto.x + deslocamentoX - 8, ponto.y - 8, 22, 22);
                     }
                 } catch (Exception ex) {
-                    // Ignora se der erro na consulta de algum jogador
+                    // Ignora se der erro na consulta de algum jogador específico
                 }
+                indice++;
             }
         } catch (Exception e) {
-            // Ignora se a partida não foi iniciada
+            // Ignora se a partida ainda não foi iniciada
         }
     }
 }
