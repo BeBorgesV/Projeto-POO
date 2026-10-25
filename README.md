@@ -1,4 +1,4 @@
-# Herdeiros do Khan - INF1636 - 1ª iteração
+# Herdeiros do Khan - INF1636 - 2ª iteração
 
 Trabalho de POO (prof. Ivan Mathias Filho), 2026.2.
 
@@ -7,44 +7,49 @@ Integrantes:
 - Ian Siqueira Matielo Moura - 2310643
 - (completar)
 
-PASTA COM AS IMAGENS A SEREM ADICIONADAS NA PASTA IMAGES: https://drive.google.com/drive/folders/17Jtg_bu90KbPdT2hoqx60qx4Oskz6ZYV?usp=sharing
-*vou colocar o projeto inteiro lá também caso tenha problema
+Imagens originais do jogo (cartas, cartelas e cartões ainda não usados): https://drive.google.com/drive/folders/17Jtg_bu90KbPdT2hoqx60qx4Oskz6ZYV?usp=sharing
 
 ## Como rodar
 
 Projeto do Eclipse. Basta importar com *File > Import > Existing Projects into Workspace*.
-O JUnit 4 já está na pasta `lib/`.
+O JUnit 4 já está na pasta `lib/` e as imagens usadas estão na pasta `images/`.
 
-Para rodar os testes: botão direito em `test/model/TodosOsTestes.java` > *Run As > JUnit Test*.
+- Jogo: botão direito em `src/controller/Principal.java` > *Run As > Java Application*.
+- Testes: botão direito em `test/model/TodosOsTestes.java` > *Run As > JUnit Test*.
+
+## Organização (MVC)
+
+- `model`: regras do jogo. A única classe pública é `Jogo` (mais a `JogadaInvalidaException`).
+- `view`: janela do tabuleiro. O tabuleiro e os peões são desenhados só com `drawImage()` do `Graphics2D`.
+- `controller`: `Principal` (main) e os tratadores de eventos, um por classe, sem expressões lambda.
 
 ## O que tem nesta iteração
 
-Nesta iteração fizemos só o componente **Model** (pacote `model`), como pedido nas orientações.
+- O tabuleiro oficial no Model (`FabricaTabuleiro.criarTabuleiroOficial`): 34 paradas
+  (R1-R11 na Rússia, P1-P11 na Pérsia, C1-C11 na China e Karakorum), 6 paradas duplas,
+  as rotas, as 9 cidades e as 12 províncias, sendo 4 do Khan. Os testes continuam usando o mapa de exemplo.
+- Janela de no máximo 1400 x 1050 com o tabuleiro, os peões e a cor do jogador da vez.
+- Como o Khan não tem dados, o equivalente é a coluna ativada: o testador escolhe num `JComboBox`
+  quantos movimentos (cavalos) a coluna dá e clica em *Ativar coluna*.
+- Para mover, o jogador clica numa parada. Cada clique gasta 1 movimento. Se o movimento não for
+  permitido pelas regras, nada acontece. As regras são as do Model: parada vizinha, pular yurts
+  próprios, não terminar em parada ocupada (menos dupla e Karakorum).
+- *Encerrar turno* passa a vez.
+- A partida começa direto com 4 jogadores, porque as janelas iniciais não eram necessárias nesta iteração.
 
-- A única classe pública é `Jogo`, que é a API usada pela View e pelo Controller. Ela só recebe e devolve
-  `String`, `int` e `boolean`. A `JogadaInvalidaException` também é pública porque sai pela API.
-- As outras classes (tabuleiro, paradas, províncias, cidades, jogador etc.) não são públicas.
-- As coleções usam o framework do Cap. 15 (`HashMap`, `HashSet`, `ArrayList`).
-- Singleton e Façade ficam para a 3ª iteração.
-
-Regras implementadas:
-- preparação da partida (2 a 5 jogadores, moedas iniciais, peões em Karakorum, 3 cidades reveladas);
-- mover o peão (vizinhança, pular yurts próprios, parada ocupada, parada dupla);
-- pegar tributo de província vizinha;
-- usar o Khan (só quando a coluna tem o ícone, uma vez por turno);
-- atacar cidade com espadas e conquistar;
-- construir yurt;
-- votos no Kurultai e fim de partida.
+As imagens dos peões (`images/peao_*.png`) foram feitas por nós, nas cores das peças de ativação,
+porque não estavam entre as imagens do jogo.
 
 ## Testes
 
 São 65 testes em JUnit 4 (pasta `test/model`), separados por regra, e a suite `TodosOsTestes` roda todos.
-Seguimos o resumo do Cap. 18: nome descritivo, um assert por teste com mensagem, timeout, `@Before`
-e teste de exceção com `expected`.
+Nesta iteração não foi pedido teste novo.
 
 ## Falta fazer
 
-- passar o tabuleiro real para a `FabricaTabuleiro` (hoje usamos um mapa de exemplo pequeno);
-- nomes dos tesouros 3, 4 e 5;
-- colunas do tabuleiro do jogador e peças de ativação (hoje `iniciarTurno` recebe os números direto);
-- melhorias, conselheiros, habilidades dos herdeiros e pontuação final.
+- janelas iniciais (nova partida / continuar e escolha dos herdeiros);
+- tabuleiro do jogador com as colunas e peças de ativação (hoje os movimentos são escolhidos pelo testador);
+- pegar tributo, Khan, atacar cidade e construir yurt pela interface (já existem no Model);
+- exibição das cartas de conselheiro;
+- salvar e carregar partida;
+- melhorias, habilidades dos herdeiros e pontuação final.

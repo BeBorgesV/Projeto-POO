@@ -25,6 +25,7 @@ public class Jogo {
 	static final int MAX_JOGADORES = 5;
 
 	private final Random sorteio;
+	private final boolean mapaOficial;
 	private final List<Jogador> jogadores = new ArrayList<>();
 	private Tabuleiro tabuleiro;
 	private Khan khan;
@@ -33,12 +34,17 @@ public class Jogo {
 	private Turno turno;
 
 	public Jogo() {
-		this(new Random());
+		this(new Random(), true);
 	}
 
-	/** Usado nos testes, com semente fixa, para o sorteio ser previsível. */
+	/** Usado nos testes: semente fixa e mapa de exemplo, para tudo ser previsível. */
 	Jogo(Random sorteio) {
+		this(sorteio, false);
+	}
+
+	private Jogo(Random sorteio, boolean mapaOficial) {
 		this.sorteio = sorteio;
+		this.mapaOficial = mapaOficial;
 	}
 
 	// ================= PREPARAÇÃO =================
@@ -55,7 +61,8 @@ public class Jogo {
 		if (new HashSet<>(Arrays.asList(cores)).size() != cores.length) {
 			throw new JogadaInvalidaException("Cada jogador precisa de uma cor diferente");
 		}
-		tabuleiro = FabricaTabuleiro.criarTabuleiroDeExemplo(sorteio);
+		tabuleiro = mapaOficial ? FabricaTabuleiro.criarTabuleiroOficial(sorteio)
+				: FabricaTabuleiro.criarTabuleiroDeExemplo(sorteio);
 		jogadores.clear();
 		for (int i = 0; i < cores.length; i++) {
 			Jogador j = new Jogador(cores[i], i < 2 ? 1 : 2);
@@ -74,8 +81,8 @@ public class Jogo {
 	 * Começa o turno do jogador da vez.
 	 *
 	 * Por enquanto quem joga informa quantos movimentos e ações de tributo a
-	 * coluna ativada dá. Na próxima iteração isto passa a vir das colunas do
-	 * tabuleiro do jogador e das peças de ativação.
+	 * coluna ativada dá (na interface, o testador escolhe os movimentos).
+	 * Depois isto passa a vir das colunas do tabuleiro do jogador.
 	 */
 	public void iniciarTurno(int movimentos, int acoesDeTributo, boolean colunaTemKhan) {
 		exigirPartida();
@@ -263,6 +270,23 @@ public class Jogo {
 	public String corDaVez() {
 		exigirPartida();
 		return daVez().cor();
+	}
+
+	/** Cores dos jogadores, na ordem de jogo. */
+	public List<String> cores() {
+		List<String> cores = new ArrayList<>();
+		for (Jogador j : jogadores) {
+			cores.add(j.cor());
+		}
+		return cores;
+	}
+
+	public boolean turnoEmAndamento() {
+		return turno != null;
+	}
+
+	public int movimentosRestantes() {
+		return turno == null ? 0 : turno.movimentosRestantes();
 	}
 
 	public String posicaoDe(String cor) {
