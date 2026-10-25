@@ -16,6 +16,8 @@ import model.Jogo;
 class PainelDaVez extends JPanel {
 	private static final long serialVersionUID = 1L;
 
+	private static final Font FONTE_TITULO = new Font("SansSerif", Font.BOLD, 20);
+	private static final Font FONTE_TEXTO = new Font("SansSerif", Font.PLAIN, 16);
 	private static final Map<String, Color> CORES = new HashMap<>();
 
 	static {
@@ -43,9 +45,9 @@ class PainelDaVez extends JPanel {
 		g2.fillRect(0, 0, getWidth(), getHeight());
 
 		g2.setColor(cor.equals("Amarelo") ? Color.BLACK : Color.WHITE);
-		g2.setFont(new Font("SansSerif", Font.BOLD, 20));
+		g2.setFont(FONTE_TITULO);
 		g2.drawString("Vez do " + cor, 15, 40);
-		g2.setFont(new Font("SansSerif", Font.PLAIN, 16));
+		g2.setFont(FONTE_TEXTO);
 		if (jogo.turnoEmAndamento()) {
 			g2.drawString("Movimentos restantes: " + jogo.movimentosRestantes(), 15, 80);
 		} else {

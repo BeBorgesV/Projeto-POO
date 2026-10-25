@@ -20,7 +20,7 @@ class TratadorDoTabuleiro extends MouseAdapter {
 	@Override
 	public void mousePressed(MouseEvent e) {
 		String parada = janela.paradaEm(e.getX(), e.getY());
-		if (parada == null || !jogo.turnoEmAndamento()) {
+		if (parada == null) {
 			return;
 		}
 		try {

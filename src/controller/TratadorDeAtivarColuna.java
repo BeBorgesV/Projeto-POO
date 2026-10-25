@@ -21,9 +21,7 @@ class TratadorDeAtivarColuna implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (!jogo.turnoEmAndamento()) {
-			jogo.iniciarTurno(janela.movimentosEscolhidos(), 0, false);
-			janela.atualizar();
-		}
+		jogo.iniciarTurno(janela.movimentosEscolhidos(), 0, false);
+		janela.atualizar();
 	}
 }

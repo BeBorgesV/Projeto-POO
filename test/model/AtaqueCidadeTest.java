@@ -95,6 +95,6 @@ public class AtaqueCidadeTest {
 	@Test(timeout = DEFAULT_TIMEOUT, expected = JogadaInvalidaException.class)
 	public void pedirTesouroQueACidadeNaoTemLancaExcecao() {
 		daEspadas(1);
-		jogo.atacarCidade("Samarcanda", "TESOURO_3");
+		jogo.atacarCidade("Samarcanda", "BOI");
 	}
 }

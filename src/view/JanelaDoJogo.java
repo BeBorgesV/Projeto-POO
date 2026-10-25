@@ -28,7 +28,6 @@ public class JanelaDoJogo extends JFrame {
 
 	private final Jogo jogo;
 	private final PainelTabuleiro painelTabuleiro;
-	private final PainelDaVez painelDaVez;
 	private final JComboBox<Integer> movimentos = new JComboBox<>();
 	private final JButton botaoAtivar = new JButton("Ativar coluna");
 	private final JButton botaoEncerrar = new JButton("Encerrar turno");
@@ -36,9 +35,7 @@ public class JanelaDoJogo extends JFrame {
 	public JanelaDoJogo(Jogo jogo) {
 		super("Herdeiros do Khan");
 		this.jogo = jogo;
-		Imagens imagens = new Imagens();
-		painelTabuleiro = new PainelTabuleiro(jogo, imagens);
-		painelDaVez = new PainelDaVez(jogo);
+		painelTabuleiro = new PainelTabuleiro(jogo, new Imagens());
 		for (int i = 1; i <= 6; i++) {
 			movimentos.addItem(i);
 		}
@@ -46,7 +43,7 @@ public class JanelaDoJogo extends JFrame {
 		JPanel lateral = new JPanel();
 		lateral.setLayout(new BoxLayout(lateral, BoxLayout.Y_AXIS));
 		lateral.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-		adicionarNaLateral(lateral, painelDaVez);
+		adicionarNaLateral(lateral, new PainelDaVez(jogo));
 		lateral.add(Box.createVerticalStrut(25));
 		adicionarNaLateral(lateral, new JLabel("Movimentos da coluna:"));
 		movimentos.setMaximumSize(new Dimension(240, 30));

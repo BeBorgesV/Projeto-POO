@@ -7,8 +7,8 @@ import java.util.Random;
 /**
  * Monta o tabuleiro.
  *
- * O mapa oficial é o do jogo de verdade. O mapa de exemplo é pequeno e serve
- * só para os testes das regras:
+ * O mapa oficial é o da imagem do tabuleiro. O mapa de exemplo é pequeno e
+ * serve só para os testes das regras:
  *
  * <pre>
  *                 [Kiev]           [Sarai]
