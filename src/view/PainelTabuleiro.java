@@ -66,9 +66,11 @@ class PainelTabuleiro extends JPanel {
 			int ordem = peoesNaParada.getOrDefault(parada, 0);
 			peoesNaParada.put(parada, ordem + 1);
 
+			// se houver mais peões que pontos (peão passando por parada ocupada), desloca para o lado
 			List<Point> pontos = mapa.pontosDe(parada);
 			Point p = pontos.get(ordem % pontos.size());
-			int x = (int) (p.x * ESCALA) - LARGURA_PEAO / 2;
+			int deslocamento = ordem / pontos.size() * LARGURA_PEAO / 2;
+			int x = (int) (p.x * ESCALA) - LARGURA_PEAO / 2 + deslocamento;
 			int y = (int) (p.y * ESCALA) - ALTURA_PEAO + 8;
 			g2.drawImage(imagens.get("peao_" + cor.toLowerCase() + ".png"), x, y, LARGURA_PEAO, ALTURA_PEAO, null);
 		}
