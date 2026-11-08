@@ -9,9 +9,18 @@ import java.util.Map;
 /**
  * Onde fica cada parada na imagem do tabuleiro, em pixels da imagem original.
  * Parada dupla tem 2 pontos e Karakorum tem 5, um para cada peão.
+ *
+ * Também guarda um ponto para os outros elementos desenhados: o ícone de
+ * tributo de cada província, o centro de cada cidade, as cabeças do Khan,
+ * os quadrados de bônus dos conselheiros e os 5 espaços da área de melhorias.
  */
 class CoordenadasDoMapa {
+	static final String KHAN = "KHAN:";
+	static final String BONUS = "BONUS:";
+	static final String AREA = "AREA:";
+
 	private final Map<String, List<Point>> pontos = new HashMap<>();
+	private final Map<String, Point> lugares = new HashMap<>();
 
 	CoordenadasDoMapa() {
 		ponto("Karakorum", 1310, 1390, 1585, 1390, 1330, 1470, 1565, 1470, 1447, 1530);
@@ -51,6 +60,57 @@ class CoordenadasDoMapa {
 		ponto("C9", 1772, 2208, 1882, 2231);
 		ponto("C10", 2231, 2231);
 		ponto("C11", 2585, 2400);
+
+		lugar("Russia 1", 622, 415);
+		lugar("Russia 2", 861, 363);
+		lugar("Russia 3", 799, 934);
+		lugar("Russia 4", 1245, 923);
+		lugar("Russia 5", 1961, 751);
+		lugar("Persia 1", 519, 1214);
+		lugar("Persia 2", 602, 1660);
+		lugar("Persia 3", 1515, 1629);
+		lugar("China 1", 2158, 1037);
+		lugar("China 2", 2397, 1556);
+		lugar("China 3", 2065, 1826);
+		lugar("China 4", 1681, 1919);
+
+		lugar("Kiev", 301, 394);
+		lugar("Moscou", 1079, 623);
+		lugar("Sarai", 1722, 415);
+		lugar("Samarcanda", 809, 1390);
+		lugar("Bagda", 249, 1660);
+		lugar("Cabul", 1266, 2034);
+		lugar("Kaesong", 2552, 830);
+		lugar("Pequim", 2075, 1453);
+		lugar("Cantao", 2449, 2241);
+
+		lugar(KHAN + "Russia 1", 633, 602);
+		lugar(KHAN + "Russia 5", 1743, 903);
+		lugar(KHAN + "Persia 2", 799, 1722);
+		lugar(KHAN + "China 3", 2127, 2054);
+		lugar(KHAN + "MELHORIAS", 93, 2781);
+
+		lugar(BONUS + "R2", 1380, 156);
+		lugar(BONUS + "R11", 2417, 290);
+		lugar(BONUS + "P1", 228, 1037);
+		lugar(BONUS + "P8", 716, 2096);
+		lugar(BONUS + "C7", 2749, 1691);
+		lugar(BONUS + "C9", 1691, 2386);
+		lugar(BONUS + "Karakorum", 1452, 1411);
+
+		int[] xDaArea = { 311, 571, 830, 1089, 1349 };
+		for (int i = 0; i < xDaArea.length; i++) {
+			lugar(AREA + i, xDaArea[i], 2791);
+		}
+	}
+
+	private void lugar(String nome, int x, int y) {
+		lugares.put(nome, new Point(x, y));
+	}
+
+	/** Ponto (na imagem original) de uma província, cidade ou lugar especial; null se não houver. */
+	Point lugar(String nome) {
+		return lugares.get(nome);
 	}
 
 	/** Recebe as coordenadas em pares: x1, y1, x2, y2, ... */

@@ -19,6 +19,7 @@ import java.util.Random;
  *     /   \    /               |
  *  [Samarcanda]              [Bagda]
  *
+ *  Conselheiros: P2 (2 peles) e Karakorum (ferro + pele + boi)
  *  Províncias: Estepe (ESPADA, do Khan)  vizinha de P1, P4
  *              Vale   (MOEDA)            vizinha de P1, P2
  *              Deserto(YURT)             vizinha de P2, P3
@@ -105,6 +106,15 @@ final class FabricaTabuleiro {
 		Provincia china3 = t.novaProvincia("China 3", Regiao.CHINA, TipoTributo.YURT, "C5", "C6", "C8", "C9", "C10");
 		Provincia china4 = t.novaProvincia("China 4", Regiao.CHINA, TipoTributo.ESPADA, "P9", "P10", "C5", "C9");
 
+		// conselheiros, conferidos na imagem do tabuleiro (manual, p. 13)
+		t.novoConselheiro("R2", new Conselheiro(1, TipoTesouro.SEDA, TipoTesouro.SEDA));
+		t.novoConselheiro("R11", new Conselheiro(1, TipoTesouro.FERRO, TipoTesouro.FERRO));
+		t.novoConselheiro("P1", new Conselheiro(1, TipoTesouro.PELE, TipoTesouro.PELE));
+		t.novoConselheiro("P8", new Conselheiro(1, TipoTesouro.ESPECIARIA, TipoTesouro.ESPECIARIA));
+		t.novoConselheiro("C7", new Conselheiro(1, TipoTesouro.BOI, TipoTesouro.BOI));
+		t.novoConselheiro("C9", new Conselheiro(1, 3));
+		t.novoConselheiro(k, new Conselheiro(2, TipoTesouro.FERRO, TipoTesouro.PELE, TipoTesouro.BOI));
+
 		russia1.tornarProvinciaDoKhan(russia2, russia3);
 		russia5.tornarProvinciaDoKhan(russia4, china1);
 		persia2.tornarProvinciaDoKhan(persia1, persia3);
@@ -112,6 +122,7 @@ final class FabricaTabuleiro {
 
 		t.prepararCidades();
 		t.prepararProvincias();
+		t.prepararConselheiros();
 		return t;
 	}
 
@@ -151,11 +162,15 @@ final class FabricaTabuleiro {
 		Provincia planalto = t.novaProvincia("Planalto", Regiao.CHINA, TipoTributo.ESPADA, "P5", "P6");
 		Provincia montanha = t.novaProvincia("Montanha", Regiao.CHINA, TipoTributo.YURT, "P3", "P6");
 
+		t.novoConselheiro("P2", new Conselheiro(1, TipoTesouro.PELE, TipoTesouro.PELE));
+		t.novoConselheiro(Tabuleiro.KARAKORUM, new Conselheiro(2, TipoTesouro.FERRO, TipoTesouro.PELE, TipoTesouro.BOI));
+
 		estepe.tornarProvinciaDoKhan(vale, planalto);
 		montanha.tornarProvinciaDoKhan(deserto, planalto);
 
 		t.prepararCidades();
 		t.prepararProvincias();
+		t.prepararConselheiros();
 		return t;
 	}
 }

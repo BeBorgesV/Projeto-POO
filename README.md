@@ -1,55 +1,65 @@
-# Herdeiros do Khan - INF1636 - 2ª iteração
+# Herdeiros do Khan - INF1636 - 3ª iteração
 
 Trabalho de POO (prof. Ivan Mathias Filho), 2026.2.
 
 Integrantes:
 - Bernardo Borges Vieira - 2211838
+- Bruno Pestana - 2310763
 - Ian Siqueira Matielo Moura - 2310643
-- (completar)
 
-Imagens originais do jogo (cartas, cartelas e cartões ainda não usados): https://drive.google.com/drive/folders/17Jtg_bu90KbPdT2hoqx60qx4Oskz6ZYV?usp=sharing
+Imagens originais do jogo: https://drive.google.com/drive/folders/17Jtg_bu90KbPdT2hoqx60qx4Oskz6ZYV?usp=sharing
+As cópias usadas pelo programa, reduzidas e com o nome do id do Model, estão em `images/`.
 
 ## Como rodar
 
 Projeto do Eclipse. Basta importar com *File > Import > Existing Projects into Workspace*.
-O JUnit 4 já está na pasta `lib/` e as imagens usadas estão na pasta `images/`.
+O JUnit 4 já está na pasta `lib/`.
 
 - Jogo: botão direito em `src/controller/Principal.java` > *Run As > Java Application*.
 - Testes: botão direito em `test/model/TodosOsTestes.java` > *Run As > JUnit Test*.
 
 ## Organização (MVC)
 
-- `model`: regras do jogo. A única classe pública é `Jogo` (mais a `JogadaInvalidaException`).
-- `view`: janela do tabuleiro. O tabuleiro e os peões são desenhados só com `drawImage()` do `Graphics2D`.
-- `controller`: `Principal` (main) e os tratadores de eventos, um por classe, sem expressões lambda.
+- `model`: regras do jogo. Públicos só a fachada `Jogo`, a `JogadaInvalidaException` e as interfaces
+  `ObservadorIF` / `ObservadoIF`.
+- `view`: janelas. Tabuleiro, peões, cartela, melhorias, cartas e peças são desenhados só com `drawImage()`.
+- `controller`: `ControladorDoJogo` organiza a sequência da partida; os tratadores de eventos são classes
+  próprias, sem expressões lambda.
 
-## O que tem nesta iteração
+## Padrões da 3ª iteração (Cap. 17)
 
-- O tabuleiro oficial no Model (`FabricaTabuleiro.criarTabuleiroOficial`): 34 paradas
-  (R1-R11 na Rússia, P1-P11 na Pérsia, C1-C11 na China e Karakorum), 6 paradas duplas,
-  as rotas, as 9 cidades e as 12 províncias, sendo 4 do Khan. Os testes continuam usando o mapa de exemplo.
-- Janela de no máximo 1400 x 1050 com o tabuleiro, os peões e a cor do jogador da vez.
-- Como o Khan não tem dados, o equivalente é a coluna ativada: o testador escolhe num `JComboBox`
-  quantos movimentos (cavalos) a coluna dá e clica em *Ativar coluna*.
-- Para mover, o jogador clica numa parada. Cada clique gasta 1 movimento. Se o movimento não for
-  permitido pelas regras, nada acontece. As regras são as do Model: parada vizinha, pular yurts
-  próprios, não terminar em parada ocupada (menos dupla e Karakorum).
-- *Encerrar turno* passa a vez.
-- A partida começa direto com 4 jogadores, porque as janelas iniciais não eram necessárias nesta iteração.
+- **Singleton:** `Jogo.getJogo()` e `ControladorDoJogo.getControlador()`, com construtor privado, como o
+  `CtrlVenda` do slide.
+- **Façade:** `Jogo` é a única porta de entrada das regras e só recebe e devolve `String`, `int`, `boolean`
+  e `List<String>`.
+- **Observer:** `Jogo` implementa `ObservadoIF` (`add`, `remove`, `get`) e avisa a cada mudança de estado. Os
+  painéis e janelas implementam `ObservadorIF` (`notify`) e se registram pelo Controller, como o `pnRelogio`
+  do slide. É assim que a tela acompanha o movimento dos peões e que a cartela e a janela de cartas abrem
+  e fecham (`Jogo.exibirCartela` / `exibirCartas`).
+- **Strategy:** cada carta de conselheiro (aberto e secreto) traz a própria regra de contagem
+  (`ConselheiroAberto`, `ConselheiroSecreto`), o que deixa entrar carta nova sem mexer na apuração.
 
-As imagens dos peões (`images/peao_*.png`) foram feitas por nós, nas cores das peças de ativação,
-porque não estavam entre as imagens do jogo.
+## Como se joga na interface
+
+1. Janela inicial > *Novo jogo* (*Continuar* fica para a 4ª iteração).
+2. Marque de 2 a 5 herdeiros e clique em *Jogar*. A ordem de jogo é a das caixas.
+3. Na 1ª vez de cada jogador, a janela de cartas abre para escolher o conselheiro secreto.
+4. A cartela abre sozinha: clique numa coluna livre para ativá-la.
+5. Clique nas paradas do mapa para mover; as outras ações ficam nos botões à direita.
+6. *Encerrar turno* passa a vez. Jogada inválida aparece no rodapé, sem caixa de diálogo.
+
+## Escolhas que o manual não decide
+
+- As imagens mostram uma melhoria de cada tipo e cor, mas não quantas há de cada cor. Os totais por tipo
+  seguem o manual; a divisão por cor está em `Melhoria.todas()`.
+- Conselheiro de "3 tesouros quaisquer" (C9): o programa entrega os tesouros de que o jogador tem mais.
+- Bônus "3 tesouros": o jogador fica com o 1º sorteado.
+- Jochi: das 2 melhorias iniciais, uma vai para a coluna branca e a outra para a coluna da cor dela.
 
 ## Testes
 
-São 65 testes em JUnit 4 (pasta `test/model`), separados por regra, e a suite `TodosOsTestes` roda todos.
-Nesta iteração não foi pedido teste novo.
+São 111 testes em JUnit 4 (pasta `test/model`), separados por regra, e a suite `TodosOsTestes` roda todos.
 
-## Falta fazer
+## Falta fazer (4ª iteração)
 
-- janelas iniciais (nova partida / continuar e escolha dos herdeiros);
-- tabuleiro do jogador com as colunas e peças de ativação (hoje os movimentos são escolhidos pelo testador);
-- pegar tributo, Khan, atacar cidade e construir yurt pela interface (já existem no Model);
-- exibição das cartas de conselheiro;
-- salvar e carregar partida;
-- melhorias, habilidades dos herdeiros e pontuação final.
+- salvar e carregar partida.

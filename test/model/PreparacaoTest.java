@@ -15,7 +15,7 @@ public class PreparacaoTest {
 
 	@Before
 	public void criaPartidaComTresJogadores() {
-		jogo = new Jogo(new Random(42));
+		jogo = Jogo.reiniciarParaTeste(new Random(42));
 		jogo.iniciarPartida("VERMELHO", "AZUL", "VERDE");
 	}
 
@@ -57,16 +57,16 @@ public class PreparacaoTest {
 
 	@Test(timeout = DEFAULT_TIMEOUT, expected = JogadaInvalidaException.class)
 	public void partidaComUmSoJogadorLancaExcecao() {
-		new Jogo().iniciarPartida("VERMELHO");
+		Jogo.reiniciarParaTeste(new Random()).iniciarPartida("VERMELHO");
 	}
 
 	@Test(timeout = DEFAULT_TIMEOUT, expected = JogadaInvalidaException.class)
 	public void partidaComSeisJogadoresLancaExcecao() {
-		new Jogo().iniciarPartida("A", "B", "C", "D", "E", "F");
+		Jogo.reiniciarParaTeste(new Random()).iniciarPartida("A", "B", "C", "D", "E", "F");
 	}
 
 	@Test(timeout = DEFAULT_TIMEOUT, expected = JogadaInvalidaException.class)
 	public void doisJogadoresComAMesmaCorLancaExcecao() {
-		new Jogo().iniciarPartida("VERMELHO", "VERMELHO");
+		Jogo.reiniciarParaTeste(new Random()).iniciarPartida("VERMELHO", "VERMELHO");
 	}
 }

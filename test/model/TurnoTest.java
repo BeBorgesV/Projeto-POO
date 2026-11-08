@@ -15,7 +15,7 @@ public class TurnoTest {
 
 	@Before
 	public void criaPartidaComTresJogadores() {
-		jogo = new Jogo(new Random(42));
+		jogo = Jogo.reiniciarParaTeste(new Random(42));
 		jogo.iniciarPartida("VERMELHO", "AZUL", "VERDE");
 	}
 

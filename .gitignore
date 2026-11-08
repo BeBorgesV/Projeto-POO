@@ -2,3 +2,7 @@ bin/
 *.class
 .vscode/
 .idea/
+
+# material local (enunciados, slides e imagens originais em alta resolução)
+Imagens-20261108/
+Transpar*ncias-20261108/

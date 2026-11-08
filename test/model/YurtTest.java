@@ -17,7 +17,7 @@ public class YurtTest {
 
 	@Before
 	public void vermelhoComUmaPecaDeYurt() {
-		jogo = new Jogo(new Random(42));
+		jogo = Jogo.reiniciarParaTeste(new Random(42));
 		jogo.iniciarPartida("VERMELHO", "AZUL");
 		vermelho = jogo.jogador("VERMELHO");
 		azul = jogo.jogador("AZUL");

@@ -13,7 +13,13 @@ import org.junit.runners.Suite;
 	AtaqueCidadeTest.class,
 	YurtTest.class,
 	KhanTest.class,
-	KurultaiTest.class
+	KurultaiTest.class,
+	ColunaTest.class,
+	MelhoriaTest.class,
+	ConselheiroTest.class,
+	FimDeJogoTest.class,
+	HerdeiroTest.class,
+	PadroesTest.class
 })
 public class TodosOsTestes {
 }

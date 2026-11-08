@@ -14,6 +14,8 @@ class Tabuleiro {
 	private final Map<String, Parada> paradas = new HashMap<>();
 	private final Map<String, Provincia> provincias = new HashMap<>();
 	private final Map<String, Cidade> cidades = new HashMap<>();
+	/** Conselheiros do mapa, pelo nome da parada onde ficam. */
+	private final Map<String, Conselheiro> conselheiros = new HashMap<>();
 	/** Peças de cidade viradas para baixo, na ordem em que serão reveladas. */
 	private final List<Cidade> pilhaDeCidades = new ArrayList<>();
 	/** As 40 peças de tesouro ainda fora do tabuleiro, embaralhadas. */
@@ -22,7 +24,7 @@ class Tabuleiro {
 
 	Tabuleiro(Random sorteio) {
 		this.sorteio = sorteio;
-		paradas.put(KARAKORUM, new Parada(KARAKORUM, Parada.Tipo.KARAKORUM));
+		paradas.put(KARAKORUM, new Parada(KARAKORUM, Parada.Tipo.KARAKORUM, null));
 		for (TipoTesouro t : TipoTesouro.values()) {
 			for (int i = 0; i < TipoTesouro.PECAS_POR_TIPO; i++) {
 				sacoDeTesouros.add(t);
@@ -33,8 +35,10 @@ class Tabuleiro {
 
 	// ---------- montagem do mapa (usada pela FabricaTabuleiro) ----------
 
+	/** A região vem da letra do nome: R = Rússia, P = Pérsia, C = China. */
 	Parada novaParada(String nome, Parada.Tipo tipo) {
-		Parada p = new Parada(nome, tipo);
+		Regiao regiao = nome.startsWith("R") ? Regiao.RUSSIA : nome.startsWith("C") ? Regiao.CHINA : Regiao.PERSIA;
+		Parada p = new Parada(nome, tipo, regiao);
 		paradas.put(nome, p);
 		return p;
 	}
@@ -61,7 +65,23 @@ class Tabuleiro {
 		return c;
 	}
 
+	void novoConselheiro(String parada, Conselheiro c) {
+		parada(parada);
+		conselheiros.put(parada, c);
+	}
+
 	// ---------- preparação ----------
+
+	/** Põe uma peça de bônus aleatória em cada conselheiro (manual, p. 4, item 5). */
+	void prepararConselheiros() {
+		List<PecaBonus> bonus = new ArrayList<>(java.util.Arrays.asList(PecaBonus.values()));
+		Collections.shuffle(bonus, sorteio);
+		List<String> nomes = new ArrayList<>(conselheiros.keySet());
+		Collections.sort(nomes); // ordem fixa, para a semente dos testes ser previsível
+		for (int i = 0; i < nomes.size() && i < bonus.size(); i++) {
+			conselheiros.get(nomes.get(i)).receberBonus(bonus.get(i));
+		}
+	}
 
 	/** Embaralha as peças de cidade e revela as 3 primeiras, cada uma com 4 tesouros. */
 	void prepararCidades() {
@@ -97,7 +117,13 @@ class Tabuleiro {
 		c.revelar(tesouros);
 	}
 
-	private List<TipoTesouro> sortearTesouros(int quantidade) {
+	/** Devolve tesouros ao saco (bônus de tesouro: o jogador fica com 1 dos 3). */
+	void devolverTesouros(List<TipoTesouro> tesouros) {
+		sacoDeTesouros.addAll(tesouros);
+		Collections.shuffle(sacoDeTesouros, sorteio);
+	}
+
+	List<TipoTesouro> sortearTesouros(int quantidade) {
 		List<TipoTesouro> sorteados = new ArrayList<>();
 		for (int i = 0; i < quantidade && !sacoDeTesouros.isEmpty(); i++) {
 			sorteados.add(sacoDeTesouros.remove(0));
@@ -147,5 +173,46 @@ class Tabuleiro {
 
 	int cidadesNaPilha() {
 		return pilhaDeCidades.size();
+	}
+
+	List<Parada> paradas() {
+		return new ArrayList<>(paradas.values());
+	}
+
+	List<Cidade> cidades() {
+		return new ArrayList<>(cidades.values());
+	}
+
+	List<Provincia> provincias() {
+		return new ArrayList<>(provincias.values());
+	}
+
+	List<Provincia> provinciasDoKhan() {
+		List<Provincia> doKhan = new ArrayList<>();
+		for (Provincia p : provincias.values()) {
+			if (p.ehDoKhan()) {
+				doKhan.add(p);
+			}
+		}
+		return doKhan;
+	}
+
+	/** Conselheiro da parada, ou null se ela não tiver. */
+	Conselheiro conselheiro(String parada) {
+		return conselheiros.get(parada);
+	}
+
+	List<String> paradasComConselheiro() {
+		return new ArrayList<>(conselheiros.keySet());
+	}
+
+	/** Todas as cidades foram conquistadas? (o outro gatilho do fim, manual p. 14) */
+	boolean todasAsCidadesConquistadas() {
+		for (Cidade c : cidades.values()) {
+			if (c.conquistador() == null) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

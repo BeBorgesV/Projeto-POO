@@ -20,7 +20,7 @@ public class MovimentoTest {
 
 	@Before
 	public void criaPartidaComVermelhoDaVezEmKarakorum() {
-		jogo = new Jogo(new Random(42));
+		jogo = Jogo.reiniciarParaTeste(new Random(42));
 		jogo.iniciarPartida("VERMELHO", "AZUL");
 		vermelho = jogo.jogador("VERMELHO");
 		azul = jogo.jogador("AZUL");
@@ -109,7 +109,7 @@ public class MovimentoTest {
 
 	@Test(timeout = DEFAULT_TIMEOUT, expected = JogadaInvalidaException.class)
 	public void paradaDuplaNaoAceitaTerceiroPeao() {
-		Jogo jogoDeTres = new Jogo(new Random(42));
+		Jogo jogoDeTres = Jogo.reiniciarParaTeste(new Random(42));
 		jogoDeTres.iniciarPartida("VERMELHO", "AZUL", "VERDE");
 		Parada p2 = jogoDeTres.tabuleiro().parada("P2");
 		jogoDeTres.jogador("AZUL").posicionarEm(p2);
