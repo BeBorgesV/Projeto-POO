@@ -45,8 +45,23 @@ public class Jogo implements ObservadoIF {
 	static final int CONSELHEIROS_ABERTOS = 4;
 	static final int SECRETOS_POR_JOGADOR = 2;
 	/** Votos de influência por número de melhorias na coluna (0 a 4), manual p. 15. */
-	private static final int[] VOTOS_DO_PRIMEIRO = { 1, 1, 2, 2, 3 };
-	private static final int[] VOTOS_DO_SEGUNDO = { 0, 1, 1, 2, 2 };
+	private static final Map<Integer, Integer> VOTOS_DO_PRIMEIRO = new HashMap<>();
+	private static final Map<Integer, Integer> VOTOS_DO_SEGUNDO = new HashMap<>();
+
+	static {
+		// melhorias na coluna -> votos de quem tem mais yurts na região
+		VOTOS_DO_PRIMEIRO.put(0, 1);
+		VOTOS_DO_PRIMEIRO.put(1, 1);
+		VOTOS_DO_PRIMEIRO.put(2, 2);
+		VOTOS_DO_PRIMEIRO.put(3, 2);
+		VOTOS_DO_PRIMEIRO.put(4, 3);
+		// melhorias na coluna -> votos do 2º com mais yurts
+		VOTOS_DO_SEGUNDO.put(0, 0);
+		VOTOS_DO_SEGUNDO.put(1, 1);
+		VOTOS_DO_SEGUNDO.put(2, 1);
+		VOTOS_DO_SEGUNDO.put(3, 2);
+		VOTOS_DO_SEGUNDO.put(4, 2);
+	}
 
 	private static Jogo jogo = null;
 
@@ -536,11 +551,10 @@ public class Jogo implements ObservadoIF {
 		if (!t.visitou(tabuleiro.parada(parada))) {
 			throw new JogadaInvalidaException("Só se entrega a um conselheiro onde o peão parou neste turno");
 		}
-		TipoTesouro[] virtual = new TipoTesouro[1];
-		List<TipoTesouro> reais = c.montarEntrega(j.tesouros(), t.tesourosVirtuais(), virtual);
-		j.gastarTesouros(reais);
-		if (virtual[0] != null) {
-			t.gastarTesouroVirtual(virtual[0]);
+		Conselheiro.Entrega entrega = c.montarEntrega(j.tesouros(), t.tesourosVirtuais());
+		j.gastarTesouros(entrega.reais);
+		if (entrega.virtual != null) {
+			t.gastarTesouroVirtual(entrega.virtual);
 		}
 		ganharVotos(j, c.votos);
 		PecaBonus b = c.entregarBonus();
@@ -699,9 +713,9 @@ public class Jogo implements ObservadoIF {
 			int melhorias = Math.min(j.cartela().melhorias(coluna).size(), Coluna.ESPACOS);
 			int ganho = 0;
 			if (yurts.get(j) == maior) {
-				ganho = VOTOS_DO_PRIMEIRO[melhorias];
+				ganho = VOTOS_DO_PRIMEIRO.get(melhorias);
 			} else if (primeiros.size() == 1 && segundo > 0 && yurts.get(j) == segundo) {
-				ganho = VOTOS_DO_SEGUNDO[melhorias];
+				ganho = VOTOS_DO_SEGUNDO.get(melhorias);
 			}
 			votosFinais.put(j, votosFinais.get(j) + ganho);
 		}
@@ -1079,6 +1093,26 @@ public class Jogo implements ObservadoIF {
 
 	// ---------- opções válidas agora (para preencher a tela) ----------
 
+	/**
+	 * Paradas para onde o peão da vez pode ir com 1 movimento agora: as mesmas
+	 * regras de {@link #mover} (vizinha ou pulando yurts próprios; no último
+	 * movimento, só onde o peão caiba).
+	 */
+	public List<String> destinosDoPeao() {
+		List<String> nomes = new ArrayList<>();
+		if (turno != null && turno.movimentosRestantes() > 0) {
+			Jogador j = turno.jogador();
+			for (Parada p : tabuleiro.paradas()) {
+				boolean podeTerminar = turno.movimentosRestantes() > 1 || p.cabePeaoDe(j);
+				if (p != j.posicao() && podeTerminar && alcancavelComUmMovimento(j, p)) {
+					nomes.add(p.nome());
+				}
+			}
+		}
+		Collections.sort(nomes);
+		return nomes;
+	}
+
 	/** Províncias com tributo vizinhas a paradas deste turno. */
 	public List<String> provinciasParaTributo() {
 		List<String> nomes = new ArrayList<>();
@@ -1124,10 +1158,14 @@ public class Jogo implements ObservadoIF {
 		return nomes;
 	}
 
-	/** Paradas onde o jogador da vez pode construir yurt agora. */
+	/**
+	 * Paradas onde o jogador da vez pode construir yurt agora: visitadas no
+	 * turno (ou vizinhas, para o Tolui), com espaço para yurt, e só se ele
+	 * ainda tiver yurt no estoque e peça de tributo de yurt (real ou virtual).
+	 */
 	public List<String> paradasParaYurt() {
 		List<String> nomes = new ArrayList<>();
-		if (turno != null) {
+		if (turno != null && turno.jogador().yurtsDisponiveis() > 0 && turno.disponivel(TipoTributo.YURT) > 0) {
 			Jogador j = turno.jogador();
 			for (Parada p : tabuleiro.paradas()) {
 				boolean alcancada = turno.visitou(p) || (j.herdeiro() == Herdeiro.TOLUI && j.posicao().ehVizinhaDe(p));

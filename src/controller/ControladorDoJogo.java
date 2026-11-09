@@ -1,6 +1,7 @@
 package controller;
 
 import java.awt.Window;
+import java.util.ArrayList;
 import java.util.List;
 
 import model.JogadaInvalidaException;
@@ -32,6 +33,12 @@ public class ControladorDoJogo {
 	private JanelaDoJogo janela;
 	private JanelaCartela cartela;
 	private JanelaCartas cartas;
+	/**
+	 * Escolha em andamento pelo clique no mapa: JanelaDoJogo.KHAN (destino do
+	 * Khan), JanelaDoJogo.TRIBUTO (província do tributo), JanelaDoJogo.YURT
+	 * (parada do yurt) ou null (nenhuma; o clique move o peão).
+	 */
+	private String escolhendo;
 
 	private ControladorDoJogo() {
 	}
@@ -83,10 +90,8 @@ public class ControladorDoJogo {
 
 		jogo.iniciarPartida(cores.toArray(new String[0]));
 		escolha.dispose();
-		janela.setLocation(0, 0);
+		janela.arrumarJanelas(cartela, cartas);
 		janela.setVisible(true);
-		cartela.setLocation(200, 380);
-		cartas.setLocation(250, 120);
 		prepararVez();
 	}
 
@@ -101,15 +106,26 @@ public class ControladorDoJogo {
 			janela.mostrarMensagem("Partida encerrada.");
 			return;
 		}
-		boolean escolher = jogo.precisaEscolherSecreto(jogo.corDaVez());
-		jogo.exibirCartas(escolher);
-		jogo.exibirCartela(!escolher);
+		// as janelas não se sobrepõem, então a cartela fica sempre aberta e as cartas abrem
+		// sozinhas quando o jogador da vez precisa escolher o conselheiro secreto
+		jogo.exibirCartela(true);
+		if (jogo.precisaEscolherSecreto(jogo.corDaVez())) {
+			jogo.exibirCartas(true);
+		}
 	}
 
 	// ================= eventos =================
 
-	/** Clique no mapa: tenta mover o peão da vez para a parada clicada. */
+	/**
+	 * Clique no mapa: se o jogador está escolhendo o destino do Khan ou a
+	 * província do tributo, usa o lugar marcado; senão, tenta mover o peão da
+	 * vez para a parada clicada.
+	 */
 	void cliqueNoTabuleiro(int x, int y) {
+		if (escolhendo != null) {
+			escolherLugar(janela.lugarMarcadoEm(x, y));
+			return;
+		}
 		String parada = janela.paradaEm(x, y);
 		if (parada == null) {
 			return;
@@ -119,6 +135,79 @@ public class ControladorDoJogo {
 			janela.mostrarMensagem(" ");
 		} catch (JogadaInvalidaException e) {
 			// deslocamento inválido: nada acontece e a vez não muda (2ª iteração)
+		}
+	}
+
+	/** Começa a escolha pelo mapa: marca em amarelo os lugares válidos agora. */
+	private void comecarEscolha(String comando) {
+		List<String> lugares = new ArrayList<>();
+		String vazio;
+		String instrucao;
+		if (JanelaDoJogo.KHAN.equals(comando)) {
+			for (String destino : jogo.destinosDoKhan()) {
+				lugares.add("KHAN:" + destino);
+			}
+			vazio = "O Khan não tem para onde ir";
+			instrucao = "Clique no mapa onde o Khan vai ficar (em amarelo)";
+		} else if (JanelaDoJogo.YURT.equals(comando)) {
+			String cor = jogo.corDaVez();
+			if (jogo.tributosDe(cor, "YURT") + jogo.yurtsVirtuais() == 0) {
+				throw new JogadaInvalidaException("Você não tem peça de tributo de yurt");
+			}
+			if (jogo.yurtsDisponiveisDe(cor) == 0) {
+				throw new JogadaInvalidaException("Você não tem mais yurts no estoque");
+			}
+			lugares.addAll(jogo.paradasParaYurt());
+			vazio = "Nenhuma parada deste turno tem espaço para yurt";
+			instrucao = "Clique na parada onde quer construir o yurt (em amarelo)";
+		} else {
+			lugares.addAll(jogo.provinciasParaTributo());
+			vazio = "Nenhuma província com tributo ao lado das paradas deste turno";
+			instrucao = "Clique na província de onde quer pegar o tributo (em amarelo)";
+		}
+		if (lugares.isEmpty()) {
+			throw new JogadaInvalidaException(vazio);
+		}
+		escolhendo = comando;
+		janela.escolherNoMapa(comando, lugares);
+		janela.mostrarMensagem(instrucao);
+	}
+
+	/** O jogador clicou num lugar marcado (ou fora deles, com {@code lugar} null). */
+	private void escolherLugar(String lugar) {
+		if (lugar == null) {
+			janela.mostrarMensagem("Clique num dos lugares marcados em amarelo (ou cancele no botão)");
+			return;
+		}
+		try {
+			if (JanelaDoJogo.YURT.equals(escolhendo)) {
+				jogo.construirYurt(lugar);
+				pararDeEscolher();
+				// com mais peças de yurt, continua mostrando onde dá para construir
+				if (!jogo.paradasParaYurt().isEmpty()) {
+					comecarEscolha(JanelaDoJogo.YURT);
+				}
+			} else if (JanelaDoJogo.KHAN.equals(escolhendo)) {
+				jogo.moverKhan(lugar.substring("KHAN:".length()));
+				pararDeEscolher();
+			} else {
+				jogo.pegarTributo(lugar);
+				pararDeEscolher();
+				// com mais punhos, continua escolhendo: dá para pegar várias peças seguidas
+				if (jogo.acoesDeTributoRestantes() > 0 && !jogo.provinciasParaTributo().isEmpty()) {
+					comecarEscolha(JanelaDoJogo.TRIBUTO);
+				}
+			}
+		} catch (JogadaInvalidaException e) {
+			janela.mostrarMensagem(e.getMessage());
+		}
+	}
+
+	private void pararDeEscolher() {
+		escolhendo = null;
+		if (janela != null) {
+			janela.escolherNoMapa(null, new ArrayList<String>());
+			janela.mostrarMensagem(" ");
 		}
 	}
 
@@ -142,10 +231,12 @@ public class ControladorDoJogo {
 	/** Executa um comando de botão; jogada inválida vira mensagem no rodapé, sem diálogo. */
 	void executar(String comando) {
 		try {
-			comandar(comando);
-			if (janela != null) {
-				janela.mostrarMensagem(" ");
+			String cancelada = escolhendo;
+			pararDeEscolher(); // qualquer botão encerra a escolha pelo mapa
+			if (comando.equals(cancelada)) {
+				return; // o próprio botão da escolha serve para cancelar
 			}
+			comandar(comando);
 		} catch (JogadaInvalidaException e) {
 			if (janela != null) {
 				janela.mostrarMensagem(e.getMessage());
@@ -185,20 +276,16 @@ public class ControladorDoJogo {
 		case JanelaDoJogo.CAVALO_POR_ESPADA:
 			jogo.trocarCavaloPorEspada();
 			break;
+		case JanelaDoJogo.YURT:
 		case JanelaDoJogo.TRIBUTO:
-			jogo.pegarTributo(exigir(janela.provinciaEscolhida(), "província"));
-			break;
 		case JanelaDoJogo.KHAN:
-			jogo.moverKhan(exigir(janela.destinoDoKhanEscolhido(), "destino do Khan"));
+			comecarEscolha(comando);
 			break;
 		case JanelaDoJogo.ATACAR:
 			jogo.atacarCidade(exigir(janela.cidadeEscolhida(), "cidade"), janela.tesouroEscolhido());
 			break;
 		case JanelaDoJogo.MOEDA_POR_TESOURO:
 			jogo.pegarTesouroComMoeda(exigir(janela.cidadeEscolhida(), "cidade"), janela.tesouroEscolhido());
-			break;
-		case JanelaDoJogo.YURT:
-			jogo.construirYurt(exigir(janela.paradaParaYurtEscolhida(), "parada"));
 			break;
 		case JanelaDoJogo.ENTREGAR:
 			jogo.entregarTesouros(exigir(janela.conselheiroEscolhido(), "conselheiro"));

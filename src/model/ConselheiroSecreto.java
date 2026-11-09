@@ -1,6 +1,8 @@
 package model;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -99,10 +101,11 @@ enum ConselheiroSecreto {
 		}
 	};
 
-	private final int[] limites;
+	/** Quanto é preciso medir para ganhar 1, 2 e 3 votos. */
+	private final List<Integer> limites;
 
-	ConselheiroSecreto(int... limites) {
-		this.limites = limites;
+	ConselheiroSecreto(int umVoto, int doisVotos, int tresVotos) {
+		this.limites = Arrays.asList(umVoto, doisVotos, tresVotos);
 	}
 
 	abstract int medir(Tabuleiro t, Jogador j);

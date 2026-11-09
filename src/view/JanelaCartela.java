@@ -3,6 +3,8 @@ package view;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowListener;
 import java.util.List;
@@ -26,6 +28,8 @@ import model.ObservadorIF;
 public class JanelaCartela extends JFrame implements ObservadorIF {
 	private static final long serialVersionUID = 1L;
 
+	private static final int LARGURA_DA_IMAGEM = 1000;
+	private static final int ALTURA_DA_IMAGEM = 546;
 	// geometria da imagem da cartela com 1000 px de largura (medida na imagem)
 	private static final int[] X_DAS_COLUNAS = { 262, 438, 614, 812 };
 	private static final int LARGURA_DO_ESPACO = 153;
@@ -38,21 +42,41 @@ public class JanelaCartela extends JFrame implements ObservadorIF {
 	private final Imagens imagens = new Imagens();
 	private final PainelCartela painel = new PainelCartela();
 
-	/** Desenha a cartela; fica numa classe interna só para ter o paintComponent. */
+	/**
+	 * Desenha a cartela; fica numa classe interna só para ter o paintComponent.
+	 * Tudo é desenhado nas medidas da imagem de 1000 px e reduzido com
+	 * Graphics2D.scale, para a janela caber ao lado da janela do jogo.
+	 */
 	private class PainelCartela extends JPanel {
 		private static final long serialVersionUID = 1L;
 
 		PainelCartela() {
-			setPreferredSize(new Dimension(1000, 546));
+			setPreferredSize(new Dimension(LARGURA_DA_IMAGEM, ALTURA_DA_IMAGEM));
 		}
 
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
 			if (jogo.partidaIniciada()) {
-				desenhar((Graphics2D) g);
+				Graphics2D g2 = (Graphics2D) g.create();
+				g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				g2.scale(escala(), escala());
+				desenhar(g2);
+				g2.dispose();
 			}
 		}
+	}
+
+	private double escala() {
+		return painel.getWidth() / (double) LARGURA_DA_IMAGEM;
+	}
+
+	/** Ajusta a janela para ocupar {@code largura} pixels, mantendo a proporção da cartela. */
+	public void ajustarLargura(int largura) {
+		Insets bordas = getInsets();
+		int interna = largura - bordas.left - bordas.right;
+		painel.setPreferredSize(new Dimension(interna, interna * ALTURA_DA_IMAGEM / LARGURA_DA_IMAGEM));
+		pack();
 	}
 
 	public JanelaCartela() {
@@ -72,8 +96,10 @@ public class JanelaCartela extends JFrame implements ObservadorIF {
 		addWindowListener(tratador);
 	}
 
-	/** Coluna sob o clique, ou null. */
-	public String colunaEm(int x, int y) {
+	/** Coluna sob o clique (em pixels da tela, desfeita a escala), ou null. */
+	public String colunaEm(int xNaTela, int yNaTela) {
+		int x = (int) (xNaTela / escala());
+		int y = (int) (yNaTela / escala());
 		List<String> colunas = jogo.colunas();
 		for (int i = 0; i < X_DAS_COLUNAS.length; i++) {
 			if (x >= X_DAS_COLUNAS[i] && x <= X_DAS_COLUNAS[i] + LARGURA_DO_ESPACO && y > 40 && y < 500) {

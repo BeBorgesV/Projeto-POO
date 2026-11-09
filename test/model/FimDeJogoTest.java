@@ -34,6 +34,14 @@ public class FimDeJogoTest {
 		jogo.encerrarTurno();
 	}
 
+	/** Com o gatilho já disparado no 1º turno: termina a rodada e joga a rodada final (2 jogadores). */
+	private void jogaAteOFim() {
+		passaAVez();
+		passaAVez();
+		passaAVez();
+		passaAVez();
+	}
+
 	@Test(timeout = DEFAULT_TIMEOUT)
 	public void fichaNeutraNoLimiteDisparaOFim() {
 		jogo.kurultai().registrarVotos(azul, 10);
@@ -66,18 +74,14 @@ public class FimDeJogoTest {
 		jogo.tabuleiro().parada("P1").colocarYurt(vermelho);
 		vermelho.usarYurt();
 		jogo.kurultai().registrarVotos(azul, 10);
-		for (int i = 0; i < 4; i++) {
-			passaAVez();
-		}
+		jogaAteOFim();
 		assertEquals("Votos finais do VERMELHO", 1, jogo.votosFinaisDe("VERMELHO"));
 	}
 
 	@Test(timeout = DEFAULT_TIMEOUT)
 	public void quemTemMaisVotosVence() {
 		jogo.kurultai().registrarVotos(azul, 10);
-		for (int i = 0; i < 4; i++) {
-			passaAVez();
-		}
+		jogaAteOFim();
 		assertEquals("Vencedores", Arrays.asList("AZUL"), jogo.vencedores());
 	}
 
@@ -86,18 +90,14 @@ public class FimDeJogoTest {
 		jogo.kurultai().registrarVotos(azul, 5);
 		jogo.kurultai().registrarVotos(vermelho, 5);
 		vermelho.receberTesouro(TipoTesouro.BOI);
-		for (int i = 0; i < 4; i++) {
-			passaAVez();
-		}
+		jogaAteOFim();
 		assertEquals("Vencedor no desempate", Arrays.asList("VERMELHO"), jogo.vencedores());
 	}
 
 	@Test(timeout = DEFAULT_TIMEOUT, expected = JogadaInvalidaException.class)
 	public void depoisDoFimNaoSeAtivaColuna() {
 		jogo.kurultai().registrarVotos(azul, 10);
-		for (int i = 0; i < 4; i++) {
-			passaAVez();
-		}
+		jogaAteOFim();
 		jogo.ativarColuna("VERDE");
 	}
 }

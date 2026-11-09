@@ -45,8 +45,12 @@ O JUnit 4 já está na pasta `lib/`.
 2. Marque de 2 a 5 herdeiros e clique em *Jogar*. A ordem de jogo é a das caixas.
 3. Na 1ª vez de cada jogador, a janela de cartas abre para escolher o conselheiro secreto.
 4. A cartela abre sozinha: clique numa coluna livre para ativá-la.
-5. Clique nas paradas do mapa para mover; as outras ações ficam nos botões à direita.
-6. *Encerrar turno* passa a vez. Jogada inválida aparece no rodapé, sem caixa de diálogo.
+5. Para mover, clique numa das paradas contornadas de branco no mapa (são as que o peão alcança com
+   1 movimento; não há botão de mover, como pede a 2ª iteração). Para o Khan, para pegar tributo e para
+   construir yurt, clique no botão e depois num dos lugares marcados em amarelo (o mesmo botão cancela).
+   As ações extras ficam nos botões à direita, agrupadas por seção.
+6. *Encerrar turno* passa a vez. Ação inválida dos botões aparece no rodapé, sem caixa de diálogo; clique
+   inválido no mapa para mover não faz nada.
 
 ## Escolhas que o manual não decide
 

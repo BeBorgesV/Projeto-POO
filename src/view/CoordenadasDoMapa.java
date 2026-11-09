@@ -108,9 +108,13 @@ class CoordenadasDoMapa {
 		lugares.put(nome, new Point(x, y));
 	}
 
-	/** Ponto (na imagem original) de uma província, cidade ou lugar especial; null se não houver. */
+	/** Ponto (na imagem original) de uma província, cidade, lugar especial ou parada; null se não houver. */
 	Point lugar(String nome) {
-		return lugares.get(nome);
+		Point p = lugares.get(nome);
+		if (p == null && pontos.containsKey(nome)) {
+			p = pontos.get(nome).get(0);
+		}
+		return p;
 	}
 
 	/** Recebe as coordenadas em pares: x1, y1, x2, y2, ... */

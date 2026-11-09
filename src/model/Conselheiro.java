@@ -48,17 +48,21 @@ class Conselheiro {
 		return b;
 	}
 
+	/** Tesouros de uma entrega: os reais a gastar e, se precisar, 1 tesouro virtual do turno. */
+	static class Entrega {
+		final List<TipoTesouro> reais = new ArrayList<>();
+		TipoTesouro virtual;
+	}
+
 	/**
 	 * Escolhe os tesouros da entrega a partir do que o jogador tem, podendo
-	 * completar com no máximo 1 tesouro virtual do turno. Devolve a lista de
-	 * tesouros reais a gastar e põe em {@code virtualUsado[0]} o virtual usado
-	 * (ou null). Lança exceção se não der para entregar.
+	 * completar com no máximo 1 tesouro virtual do turno. Lança exceção se não
+	 * der para entregar.
 	 */
-	List<TipoTesouro> montarEntrega(Map<TipoTesouro, Integer> doJogador, List<TipoTesouro> virtuais,
-			TipoTesouro[] virtualUsado) {
+	Entrega montarEntrega(Map<TipoTesouro, Integer> doJogador, List<TipoTesouro> virtuais) {
 		Map<TipoTesouro, Integer> resto = new HashMap<>(doJogador);
-		List<TipoTesouro> reais = new ArrayList<>();
-		virtualUsado[0] = null;
+		Entrega entrega = new Entrega();
+		List<TipoTesouro> reais = entrega.reais;
 		if (quaisquer > 0) {
 			// shortcut: escolhe sozinho os tesouros de que o jogador tem mais; trocar por escolha na tela se o grupo quiser
 			for (int i = 0; i < quaisquer; i++) {
@@ -71,13 +75,13 @@ class Conselheiro {
 				if (maior != null) {
 					reais.add(maior);
 					resto.put(maior, resto.get(maior) - 1);
-				} else if (virtualUsado[0] == null && !virtuais.isEmpty()) {
-					virtualUsado[0] = virtuais.get(0);
+				} else if (entrega.virtual == null && !virtuais.isEmpty()) {
+					entrega.virtual = virtuais.get(0);
 				} else {
 					throw new JogadaInvalidaException("Faltam tesouros para esta entrega");
 				}
 			}
-			return reais;
+			return entrega;
 		}
 		for (Map.Entry<TipoTesouro, Integer> e : pedido.entrySet()) {
 			for (int i = 0; i < e.getValue(); i++) {
@@ -85,14 +89,14 @@ class Conselheiro {
 				if (resto.getOrDefault(t, 0) > 0) {
 					reais.add(t);
 					resto.put(t, resto.get(t) - 1);
-				} else if (virtualUsado[0] == null && virtuais.contains(t)) {
-					virtualUsado[0] = t;
+				} else if (entrega.virtual == null && virtuais.contains(t)) {
+					entrega.virtual = t;
 				} else {
 					throw new JogadaInvalidaException("Faltam tesouros para esta entrega: o conselheiro pede " + descricao());
 				}
 			}
 		}
-		return reais;
+		return entrega;
 	}
 
 	String descricao() {

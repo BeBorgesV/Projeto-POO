@@ -1,9 +1,13 @@
 package view;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -17,6 +21,8 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 
 import controller.ControladorDoJogo;
 import model.Jogo;
@@ -25,12 +31,16 @@ import model.ObservadorIF;
 
 /**
  * Janela do tabuleiro (até 1400 x 1050). O tabuleiro e as peças são desenhados
- * com Java2D; à direita ficam os componentes Swing das ações que precisam de
- * escolha do jogador (o movimento é pelo clique no mapa e a coluna é ativada
- * pelo clique na cartela).
+ * com Java2D; à direita ficam os componentes Swing, agrupados em seções:
+ * janelas, ações da coluna, ações extras, habilidade do herdeiro e fim do
+ * turno. O movimento, o destino do Khan, a província do tributo e a parada
+ * do yurt são escolhidos clicando no mapa. Para mover, basta clicar numa das
+ * paradas contornadas de branco (sem botão, como pede a 2ª iteração); para o
+ * Khan, o tributo e o yurt, o botão marca as opções em amarelo. A coluna é
+ * ativada clicando na cartela.
  *
  * É observadora do Jogo: a cada notificação atualiza as opções das listas e
- * habilita só os botões que fazem sentido.
+ * habilita só o que faz sentido no momento.
  */
 public class JanelaDoJogo extends JFrame implements ObservadorIF {
 	private static final long serialVersionUID = 1L;
@@ -51,23 +61,37 @@ public class JanelaDoJogo extends JFrame implements ObservadorIF {
 	public static final String BONUS = "BONUS";
 	public static final String ENCERRAR = "ENCERRAR";
 
-	private static final String PILHA = "Pilha";
+	private static final int LARGURA = 400;
+	private static final String PILHA = "Topo da pilha";
 	private static final String COR_DA_PECA = "Cor da peça";
+	private static final String TEXTO_KHAN = "Mover o Khan (clicar no mapa)";
+	private static final String TEXTO_TRIBUTO = "Pegar tributo (clicar no mapa)";
+	private static final String TEXTO_YURT = "Escolher a parada no mapa";
+	private static final Font DICA = new Font("SansSerif", Font.ITALIC, 11);
 
 	private final Jogo jogo = Jogo.getJogo();
 	private final PainelTabuleiro painelTabuleiro;
 	private final List<JButton> botoes = new ArrayList<>();
 
-	private final JComboBox<String> provincias = new JComboBox<>();
-	private final JComboBox<String> destinosDoKhan = new JComboBox<>();
 	private final JComboBox<String> cidades = new JComboBox<>();
 	private final JComboBox<String> tesouros = new JComboBox<>();
-	private final JComboBox<String> paradasParaYurt = new JComboBox<>();
 	private final JComboBox<String> conselheiros = new JComboBox<>();
 	private final JComboBox<String> espacosDeMelhoria = new JComboBox<>();
 	private final JComboBox<String> colunas = new JComboBox<>();
 	private final JComboBox<String> bonus = new JComboBox<>();
 	private final JLabel mensagem = new JLabel(" ");
+	private final JButton botaoDoKhan;
+	private final JButton botaoDoTributo;
+	private final JButton botaoDoYurt;
+
+	// seção da habilidade: só aparece a linha do herdeiro da vez
+	private final TitledBorder tituloDaHabilidade = BorderFactory.createTitledBorder("Habilidade");
+	private final JPanel secaoDaHabilidade;
+	private final JPanel linhaDaAltani;
+	private final JPanel linhaDoChagatai;
+	private final JPanel linhaDoOgedei;
+	private final JPanel linhaDoJochi;
+	private final JPanel linhaDoTolui;
 
 	public JanelaDoJogo() {
 		super("Herdeiros de Khan");
@@ -75,25 +99,48 @@ public class JanelaDoJogo extends JFrame implements ObservadorIF {
 
 		JPanel lateral = new JPanel();
 		lateral.setLayout(new BoxLayout(lateral, BoxLayout.Y_AXIS));
-		lateral.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
+		lateral.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 		PainelDaVez vez = new PainelDaVez();
 		vez.setAlignmentX(Component.LEFT_ALIGNMENT); // misturar alinhamentos no BoxLayout soma as larguras
 		lateral.add(vez);
-		linha(lateral, botao("Mostrar cartela", CARTELA), botao("Mostrar cartas", CARTAS));
-		linha(lateral, botao("Trocar peão", TROCAR_PEAO), botao("Cavalo → espada", CAVALO_POR_ESPADA));
-		linha(lateral, rotulo("Tributo"), provincias, botao("Pegar", TRIBUTO));
-		linha(lateral, rotulo("Khan"), destinosDoKhan, botao("Mover Khan", KHAN));
-		linha(lateral, rotulo("Cidade"), cidades, tesouros);
-		linha(lateral, botao("Atacar", ATACAR), botao("Moeda → tesouro", MOEDA_POR_TESOURO));
-		linha(lateral, rotulo("Yurt"), paradasParaYurt, botao("Construir", YURT));
-		linha(lateral, rotulo("Conselheiro"), conselheiros, botao("Entregar", ENTREGAR));
-		linha(lateral, rotulo("Melhoria"), espacosDeMelhoria, colunas);
-		linha(lateral, botao("Comprar (2 moedas)", COMPRAR), botao("Grátis", GRATIS));
-		linha(lateral, rotulo("Bônus"), bonus, botao("Usar", BONUS));
-		linha(lateral, botao("Encerrar turno", ENCERRAR));
-		mensagem.setPreferredSize(new Dimension(390, 40));
-		mensagem.setAlignmentX(Component.LEFT_ALIGNMENT);
-		lateral.add(mensagem);
+
+		JPanel janelas = secao(lateral, BorderFactory.createTitledBorder("Janelas"));
+		linha(janelas, botao("Mostrar cartela", CARTELA), botao("Mostrar cartas", CARTAS));
+
+		JPanel coluna = secao(lateral, BorderFactory.createTitledBorder("Ações da coluna"));
+		linha(coluna, dica("Mover: clique numa parada contornada de branco no mapa"));
+		botaoDoKhan = botao(TEXTO_KHAN, KHAN);
+		linha(coluna, botaoDoKhan);
+		botaoDoTributo = botao(TEXTO_TRIBUTO, TRIBUTO);
+		linha(coluna, botaoDoTributo);
+
+		JPanel extras = secao(lateral, BorderFactory.createTitledBorder("Ações extras (a qualquer momento)"));
+		linha(extras, rotulo("Atacar cidade"), cidades, tesouros);
+		linha(extras, rotulo(""), botao("Atacar (gasta espadas)", ATACAR));
+		botaoDoYurt = botao(TEXTO_YURT, YURT);
+		linha(extras, rotulo("Construir yurt"), botaoDoYurt);
+		linha(extras, rotulo("Entregar em"), conselheiros, botao("Entregar", ENTREGAR));
+		linha(extras, rotulo("Melhoria"), espacosDeMelhoria, botao("Comprar", COMPRAR));
+		linha(extras, rotulo(""), botao("Pegar grátis (linha completa)", GRATIS));
+		linha(extras, rotulo("Peça de bônus"), bonus, botao("Usar", BONUS));
+
+		secaoDaHabilidade = secao(lateral, tituloDaHabilidade);
+		linhaDaAltani = linha(secaoDaHabilidade, botao("Trocar peão", TROCAR_PEAO), dica("antes de ativar a coluna"));
+		linhaDoChagatai = linha(secaoDaHabilidade, botao("Trocar 1 cavalo por 1 espada", CAVALO_POR_ESPADA));
+		linhaDoOgedei = linha(secaoDaHabilidade, botao("Pagar 1 moeda por 1 tesouro", MOEDA_POR_TESOURO),
+				dica("usa a cidade de \"Atacar\""));
+		linhaDoJochi = linha(secaoDaHabilidade, rotulo("Pôr melhoria em"), colunas);
+		linhaDoTolui = linha(secaoDaHabilidade, dica("Pode construir yurt nas paradas vizinhas a ele"));
+
+		JPanel fim = secao(lateral, BorderFactory.createEmptyBorder(6, 0, 0, 0));
+		JButton encerrar = botao("Encerrar turno", ENCERRAR);
+		encerrar.setFont(encerrar.getFont().deriveFont(Font.BOLD, 14f));
+		linha(fim, encerrar);
+		mensagem.setPreferredSize(new Dimension(LARGURA - 20, 50));
+		mensagem.setForeground(new Color(170, 0, 0));
+		JPanel linhaDaMensagem = linha(fim, mensagem);
+		linhaDaMensagem.setPreferredSize(new Dimension(LARGURA - 12, 54));
+		linhaDaMensagem.setMaximumSize(linhaDaMensagem.getPreferredSize());
 
 		add(painelTabuleiro, BorderLayout.CENTER);
 		add(lateral, BorderLayout.EAST);
@@ -102,6 +149,15 @@ public class JanelaDoJogo extends JFrame implements ObservadorIF {
 		pack();
 		ControladorDoJogo.getControlador().registra(this);
 		atualizar();
+	}
+
+	private JPanel secao(JPanel lateral, Border borda) {
+		JPanel s = new JPanel();
+		s.setLayout(new BoxLayout(s, BoxLayout.Y_AXIS));
+		s.setBorder(borda);
+		s.setAlignmentX(Component.LEFT_ALIGNMENT);
+		lateral.add(s);
+		return s;
 	}
 
 	private JButton botao(String texto, String comando) {
@@ -113,22 +169,54 @@ public class JanelaDoJogo extends JFrame implements ObservadorIF {
 
 	private JLabel rotulo(String texto) {
 		JLabel l = new JLabel(texto);
-		l.setPreferredSize(new Dimension(75, 24));
+		l.setPreferredSize(new Dimension(95, 24));
 		return l;
 	}
 
-	private void linha(JPanel lateral, JComponent... componentes) {
-		JPanel linha = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+	private JLabel dica(String texto) {
+		JLabel l = new JLabel(texto);
+		l.setFont(DICA);
+		return l;
+	}
+
+	private JPanel linha(JPanel secao, JComponent... componentes) {
+		JPanel linha = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 1));
 		for (JComponent c : componentes) {
 			if (c instanceof JComboBox) {
-				c.setPreferredSize(new Dimension(140, 24));
+				c.setPreferredSize(new Dimension(130, 24));
 			}
 			linha.add(c);
 		}
 		linha.setAlignmentX(Component.LEFT_ALIGNMENT);
-		linha.setPreferredSize(new Dimension(400, 32));
+		linha.setPreferredSize(new Dimension(LARGURA - 12, 30));
 		linha.setMaximumSize(linha.getPreferredSize());
-		lateral.add(linha);
+		secao.add(linha);
+		return linha;
+	}
+
+	/**
+	 * Põe as 3 janelas na tela sem sobreposição: o jogo à esquerda e, na faixa
+	 * que sobra à direita, a cartela em cima e as cartas embaixo (cartela e
+	 * cartas se reduzem para caber). Em tela estreita demais, a cartela e as
+	 * cartas ficam lado a lado na parte de baixo, por cima do tabuleiro.
+	 */
+	public void arrumarJanelas(JanelaCartela cartela, JanelaCartas cartas) {
+		Rectangle tela = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+		setLocation(tela.x, tela.y);
+		int x = tela.x + getWidth();
+		int largura = tela.x + tela.width - x;
+		if (largura >= 400) {
+			cartela.ajustarLargura(Math.min(largura, 1000));
+			cartela.setLocation(x, tela.y);
+			int yCartas = tela.y + cartela.getHeight();
+			cartas.ocupar(x, yCartas, Math.min(largura, 560), tela.y + tela.height - yCartas);
+		} else {
+			// shortcut: em tela com menos de ~1800 px de largura não cabe tudo; as janelas cobrem parte do tabuleiro
+			int metade = tela.width / 2;
+			cartela.ajustarLargura(Math.min(metade, 1000));
+			cartela.setLocation(tela.x, tela.y + tela.height - cartela.getHeight());
+			cartas.ocupar(tela.x + metade, tela.y + tela.height - 400, Math.min(metade, 560), 400);
+		}
 	}
 
 	// ---------- ligação com o Controller ----------
@@ -148,17 +236,28 @@ public class JanelaDoJogo extends JFrame implements ObservadorIF {
 		return painelTabuleiro.paradaEm(x, y);
 	}
 
+	/**
+	 * Começa (ou, com {@code comando} null, termina) uma escolha pelo clique no
+	 * mapa: os lugares possíveis ficam marcados em amarelo e o botão do
+	 * comando passa a servir para cancelar.
+	 *
+	 * @param lugares nomes de paradas (yurt), de províncias, ou "KHAN:" + destino do Khan
+	 */
+	public void escolherNoMapa(String comando, List<String> lugares) {
+		painelTabuleiro.marcar(lugares);
+		botaoDoKhan.setText(KHAN.equals(comando) ? "Cancelar a escolha do Khan" : TEXTO_KHAN);
+		botaoDoTributo.setText(TRIBUTO.equals(comando) ? "Cancelar a escolha do tributo" : TEXTO_TRIBUTO);
+		botaoDoYurt.setText(YURT.equals(comando) ? "Cancelar a escolha" : TEXTO_YURT);
+	}
+
+	/** Lugar marcado onde o jogador clicou, ou null. */
+	public String lugarMarcadoEm(int x, int y) {
+		return painelTabuleiro.marcadoEm(x, y);
+	}
+
 	/** Mensagem curta no rodapé (jogada inválida etc.), sem caixa de diálogo. */
 	public void mostrarMensagem(String texto) {
 		mensagem.setText("<html>" + texto + "</html>");
-	}
-
-	public String provinciaEscolhida() {
-		return (String) provincias.getSelectedItem();
-	}
-
-	public String destinoDoKhanEscolhido() {
-		return (String) destinosDoKhan.getSelectedItem();
 	}
 
 	public String cidadeEscolhida() {
@@ -167,10 +266,6 @@ public class JanelaDoJogo extends JFrame implements ObservadorIF {
 
 	public String tesouroEscolhido() {
 		return (String) tesouros.getSelectedItem();
-	}
-
-	public String paradaParaYurtEscolhida() {
-		return (String) paradasParaYurt.getSelectedItem();
 	}
 
 	public String conselheiroEscolhido() {
@@ -205,10 +300,8 @@ public class JanelaDoJogo extends JFrame implements ObservadorIF {
 		}
 		boolean emTurno = jogo.turnoEmAndamento() && !jogo.partidaEncerrada();
 		String cor = jogo.corDaVez();
-		preencher(provincias, jogo.provinciasParaTributo());
-		preencher(destinosDoKhan, jogo.destinosDoKhan());
+		String herdeiro = jogo.herdeiroDe(cor);
 		preencher(cidades, jogo.cidadesDisponiveis());
-		preencher(paradasParaYurt, jogo.paradasParaYurt());
 		preencher(conselheiros, jogo.conselheirosParaEntrega());
 		preencher(bonus, jogo.bonusGuardadosDe(cor));
 		if (tesouros.getItemCount() == 0) {
@@ -226,25 +319,32 @@ public class JanelaDoJogo extends JFrame implements ObservadorIF {
 			nomes.addAll(jogo.colunas().subList(0, 3));
 			preencher(colunas, nomes);
 		}
+
+		tituloDaHabilidade.setTitle("Habilidade de " + herdeiro);
+		linhaDaAltani.setVisible("Altani".equals(herdeiro));
+		linhaDoChagatai.setVisible("Chagatai".equals(herdeiro));
+		linhaDoOgedei.setVisible("Ogedei".equals(herdeiro));
+		linhaDoJochi.setVisible("Jochi".equals(herdeiro));
+		linhaDoTolui.setVisible("Tolui".equals(herdeiro));
+		secaoDaHabilidade.revalidate();
+		secaoDaHabilidade.repaint();
+
 		for (JButton b : botoes) {
 			String c = b.getActionCommand();
 			boolean ligado = emTurno;
 			if (CARTELA.equals(c) || CARTAS.equals(c)) {
 				ligado = !jogo.partidaEncerrada();
 			} else if (TROCAR_PEAO.equals(c)) {
-				ligado = !jogo.turnoEmAndamento() && !jogo.partidaEncerrada() && jogo.quantidadeDePeoes(cor) > 1;
-			} else if (CAVALO_POR_ESPADA.equals(c)) {
-				ligado = emTurno && "Chagatai".equals(jogo.herdeiroDe(cor));
-			} else if (MOEDA_POR_TESOURO.equals(c)) {
-				ligado = emTurno && "Ogedei".equals(jogo.herdeiroDe(cor));
+				ligado = !jogo.turnoEmAndamento() && !jogo.partidaEncerrada();
 			} else if (GRATIS.equals(c)) {
 				ligado = emTurno && jogo.melhoriasGratisPendentes() > 0;
 			} else if (KHAN.equals(c)) {
 				ligado = emTurno && jogo.khanPendente();
+			} else if (TRIBUTO.equals(c)) {
+				ligado = emTurno && jogo.acoesDeTributoRestantes() > 0;
 			}
 			b.setEnabled(ligado);
 		}
-		colunas.setEnabled("Jochi".equals(jogo.herdeiroDe(cor)));
 		painelTabuleiro.repaint();
 	}
 

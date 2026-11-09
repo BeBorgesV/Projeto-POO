@@ -18,7 +18,8 @@ import java.util.Set;
 class CartelaDoJogador {
 	private final Herdeiro herdeiro;
 	private final Map<Coluna, List<Melhoria>> coloridas = new HashMap<>();
-	private final Melhoria[] branca = new Melhoria[Coluna.ESPACOS];
+	/** Coluna branca: linha (1 a 4) -> melhoria grátis daquela linha. */
+	private final Map<Integer, Melhoria> branca = new HashMap<>();
 	private final Set<Coluna> usadas = new HashSet<>();
 	/** Linhas completas cuja melhoria grátis ainda não foi pega. */
 	private final List<Integer> linhasPendentes = new ArrayList<>();
@@ -77,9 +78,9 @@ class CartelaDoJogador {
 			return new ArrayList<>(coloridas.get(c));
 		}
 		List<Melhoria> m = new ArrayList<>();
-		for (Melhoria b : branca) {
-			if (b != null) {
-				m.add(b);
+		for (int linha = 1; linha <= Coluna.ESPACOS; linha++) {
+			if (branca.containsKey(linha)) {
+				m.add(branca.get(linha));
 			}
 		}
 		return m;
@@ -114,7 +115,7 @@ class CartelaDoJogador {
 		}
 		coloridas.get(c).add(m);
 		int linha = coloridas.get(c).size();
-		if (linhaCompleta(linha) && branca[linha - 1] == null && !linhasPendentes.contains(linha)) {
+		if (linhaCompleta(linha) && !branca.containsKey(linha) && !linhasPendentes.contains(linha)) {
 			linhasPendentes.add(linha);
 		}
 	}
@@ -147,11 +148,11 @@ class CartelaDoJogador {
 			throw new JogadaInvalidaException("Não há melhoria grátis a receber");
 		}
 		int linha = linhasPendentes.remove(0);
-		branca[linha - 1] = m;
+		branca.put(linha, m);
 	}
 
 	/** Melhoria inicial do Jochi: ocupa o 1º espaço da coluna branca. */
 	void colocarNaBrancaInicial(Melhoria m) {
-		branca[0] = m;
+		branca.put(1, m);
 	}
 }

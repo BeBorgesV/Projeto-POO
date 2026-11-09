@@ -10,6 +10,7 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,8 @@ class PainelTabuleiro extends JPanel implements ObservadorIF {
 	private final Image tabuleiro;
 	private final int largura;
 	private final int altura;
+	/** Lugares que o jogador pode escolher clicando (destinos do Khan, províncias com tributo). */
+	private final List<String> marcados = new ArrayList<>();
 
 	PainelTabuleiro(Imagens imagens) {
 		this.imagens = imagens;
@@ -88,6 +91,58 @@ class PainelTabuleiro extends JPanel implements ObservadorIF {
 		desenharYurts(g2);
 		desenharPeoes(g2);
 		desenharKhan(g2);
+		if (marcados.isEmpty()) {
+			desenharDestinosDoPeao(g2);
+		} else {
+			desenharMarcados(g2);
+		}
+	}
+
+	/**
+	 * Enquanto houver movimento no turno, as paradas para onde o peão pode ir
+	 * ficam contornadas, sem precisar de botão (o movimento continua sendo só
+	 * pelo clique na parada, como pede a 2ª iteração).
+	 */
+	private void desenharDestinosDoPeao(Graphics2D g2) {
+		g2.setStroke(new BasicStroke(3));
+		for (String parada : jogo.destinosDoPeao()) {
+			Point p = mapa.lugar(parada);
+			int r = 20;
+			g2.setColor(new Color(255, 255, 255, 70));
+			g2.fillOval(x(p) - r, y(p) - r, 2 * r, 2 * r);
+			g2.setColor(Color.WHITE);
+			g2.drawOval(x(p) - r, y(p) - r, 2 * r, 2 * r);
+		}
+	}
+
+	/** Marca no mapa os lugares que podem ser clicados (nomes de {@link CoordenadasDoMapa#lugar}). */
+	void marcar(List<String> lugares) {
+		marcados.clear();
+		marcados.addAll(lugares);
+		repaint();
+	}
+
+	/** Círculo amarelo em cada lugar marcado. */
+	private void desenharMarcados(Graphics2D g2) {
+		for (String lugar : marcados) {
+			Point p = mapa.lugar(lugar);
+			int r = 24;
+			g2.setColor(new Color(255, 220, 0, 90));
+			g2.fillOval(x(p) - r, y(p) - r, 2 * r, 2 * r);
+			g2.setColor(new Color(255, 200, 0));
+			g2.setStroke(new BasicStroke(4));
+			g2.drawOval(x(p) - r, y(p) - r, 2 * r, 2 * r);
+		}
+	}
+
+	/** Lugar marcado onde o jogador clicou, ou null. */
+	String marcadoEm(int x, int y) {
+		for (String lugar : marcados) {
+			if (mapa.lugar(lugar).distance(x / ESCALA, y / ESCALA) <= 80) {
+				return lugar;
+			}
+		}
+		return null;
 	}
 
 	private int x(Point p) {

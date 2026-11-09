@@ -118,4 +118,17 @@ public class MovimentoTest {
 		jogoDeTres.iniciarTurno(1, 0, false);
 		jogoDeTres.mover("P2");
 	}
+
+	@Test(timeout = DEFAULT_TIMEOUT)
+	public void destinosDoPeaoSaoAsParadasVizinhas() {
+		jogo.iniciarTurno(1, 0, false);
+		assertEquals("Destinos a partir de Karakorum", java.util.Arrays.asList("P1", "P4"), jogo.destinosDoPeao());
+	}
+
+	@Test(timeout = DEFAULT_TIMEOUT)
+	public void ultimoMovimentoNaoMostraParadaOcupada() {
+		azul.posicionarEm(parada("P1"));
+		jogo.iniciarTurno(1, 0, false);
+		assertEquals("Destinos com P1 ocupada no último movimento", java.util.Arrays.asList("P4"), jogo.destinosDoPeao());
+	}
 }

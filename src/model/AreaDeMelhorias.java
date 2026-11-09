@@ -2,7 +2,9 @@ package model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -19,7 +21,8 @@ class AreaDeMelhorias {
 	/** Posição usada pela API para "a do topo da pilha". */
 	static final int PILHA = -1;
 
-	private final Melhoria[] espacos = new Melhoria[ESPACOS];
+	/** Melhoria de cada espaço (0 a 4); espaço vazio não tem chave. */
+	private final Map<Integer, Melhoria> espacos = new HashMap<>();
 	private final List<Melhoria> pilha = new ArrayList<>();
 
 	AreaDeMelhorias(Random sorteio) {
@@ -31,14 +34,14 @@ class AreaDeMelhorias {
 	/** Preenche os espaços vazios com melhorias da pilha. */
 	void repor() {
 		for (int i = 0; i < ESPACOS; i++) {
-			if (espacos[i] == null && !pilha.isEmpty()) {
-				espacos[i] = pilha.remove(0);
+			if (!espacos.containsKey(i) && !pilha.isEmpty()) {
+				espacos.put(i, pilha.remove(0));
 			}
 		}
 	}
 
 	boolean vazio(int espaco) {
-		return espacos[espaco] == null;
+		return !espacos.containsKey(espaco);
 	}
 
 	Melhoria ver(int posicao) {
@@ -48,10 +51,11 @@ class AreaDeMelhorias {
 			}
 			return pilha.get(0);
 		}
-		if (posicao < 0 || posicao >= ESPACOS || espacos[posicao] == null) {
+		Melhoria m = espacos.get(posicao);
+		if (m == null) {
 			throw new JogadaInvalidaException("Não há melhoria nesse espaço");
 		}
-		return espacos[posicao];
+		return m;
 	}
 
 	/**
@@ -65,9 +69,14 @@ class AreaDeMelhorias {
 			return m;
 		}
 		for (int i = posicao; i > 0; i--) {
-			espacos[i] = espacos[i - 1];
+			Melhoria daEsquerda = espacos.get(i - 1);
+			if (daEsquerda == null) {
+				espacos.remove(i);
+			} else {
+				espacos.put(i, daEsquerda);
+			}
 		}
-		espacos[0] = null;
+		espacos.remove(0);
 		return m;
 	}
 
@@ -79,7 +88,8 @@ class AreaDeMelhorias {
 	/** Ids das melhorias nos 5 espaços; "" para espaço vazio. */
 	List<String> ids() {
 		List<String> ids = new ArrayList<>();
-		for (Melhoria m : espacos) {
+		for (int i = 0; i < ESPACOS; i++) {
+			Melhoria m = espacos.get(i);
 			ids.add(m == null ? "" : m.id);
 		}
 		return ids;

@@ -24,13 +24,22 @@ class PainelDaVez extends JPanel implements ObservadorIF {
 	private static final long serialVersionUID = 1L;
 
 	private static final Font TITULO = new Font("SansSerif", Font.BOLD, 17);
+	private static final Font NOME = new Font("SansSerif", Font.BOLD, 26);
+	private static final Font PASSO = new Font("SansSerif", Font.BOLD, 14);
+	private static final Font TURNO = new Font("SansSerif", Font.BOLD, 13);
+	private static final int ALTURA_DA_FAIXA = 136;
 	private static final Font TEXTO = new Font("SansSerif", Font.PLAIN, 12);
 	private static final Font NEGRITO = new Font("SansSerif", Font.BOLD, 12);
+	private static final Font CABECALHO = new Font("SansSerif", Font.BOLD, 11);
+	// colunas do quadro: título em 2 linhas e o centro de cada coluna (os números ficam centralizados embaixo)
+	private static final String[][] TITULOS = { { "Espadas", "" }, { "Moedas", "" }, { "Peças", "de yurt" },
+			{ "Tesouros", "" }, { "Yurts no", "estoque" }, { "Votos", "" } };
+	private static final int[] CENTROS = { 112, 161, 210, 260, 313, 362 };
 
 	private final Jogo jogo = Jogo.getJogo();
 
 	PainelDaVez() {
-		setPreferredSize(new Dimension(400, 300));
+		setPreferredSize(new Dimension(400, 304));
 		setMaximumSize(getPreferredSize());
 		ControladorDoJogo.getControlador().registra(this);
 	}
@@ -52,38 +61,75 @@ class PainelDaVez extends JPanel implements ObservadorIF {
 			desenharResultado(g2);
 			return;
 		}
-		String cor = jogo.corDaVez();
-		g2.setColor(Cores.de(cor));
-		g2.fillRect(0, 0, getWidth(), 120);
-		g2.setColor(Cores.texto(cor));
-		g2.setFont(TITULO);
-		g2.drawString("Vez de " + jogo.herdeiroDe(cor) + " (" + cor + ")", 10, 24);
-		g2.setFont(TEXTO);
-		if (jogo.turnoEmAndamento()) {
-			g2.drawString("Coluna " + jogo.colunaAtivada() + (jogo.khanPendente() ? "  -  falta usar o Khan" : ""), 10, 46);
-			g2.drawString("Movimentos: " + jogo.movimentosRestantes() + "    Pegar tributo: "
-					+ jogo.acoesDeTributoRestantes(), 10, 66);
-			g2.drawString("Virtuais: " + jogo.moedasVirtuais() + " moeda, " + jogo.espadasVirtuais() + " espada, "
-					+ jogo.yurtsVirtuais() + " yurt" + (jogo.tesourosVirtuais().isEmpty() ? "" : ", tesouro " + jogo.tesourosVirtuais()), 10, 86);
-			if (jogo.melhoriasGratisPendentes() > 0) {
-				g2.drawString("Linha completa: pegue " + jogo.melhoriasGratisPendentes() + " melhoria grátis", 10, 106);
-			}
-		} else if (jogo.precisaEscolherSecreto(cor)) {
-			g2.drawString("Escolha o conselheiro secreto na janela de cartas", 10, 50);
-		} else {
-			g2.drawString("Clique numa coluna livre da cartela para começar", 10, 50);
-			if (jogo.quantidadeDePeoes(cor) > 1) {
-				g2.drawString("Altani joga com o peão " + (jogo.peaoAtivo(cor) + 1) + " (marcado com *)", 10, 70);
-			}
-		}
-		desenharQuadro(g2, 140);
+		desenharFaixaDaVez(g2);
+		desenharQuadro(g2, ALTURA_DA_FAIXA + 20);
 	}
 
-	/** Uma linha por jogador: espadas, yurts e moedas, tesouros, yurts guardados e votos. */
+	/**
+	 * Faixa na cor do jogador da vez: o nome do herdeiro em destaque, o
+	 * próximo passo numa caixa branca e o que ainda resta no turno.
+	 */
+	private void desenharFaixaDaVez(Graphics2D g2) {
+		String cor = jogo.corDaVez();
+		g2.setColor(Cores.de(cor));
+		g2.fillRect(0, 0, getWidth(), ALTURA_DA_FAIXA);
+		g2.setColor(Cores.texto(cor));
+		g2.setFont(NOME);
+		String nome = "Vez de " + jogo.herdeiroDe(cor);
+		g2.drawString(nome, 10, 32);
+		g2.setFont(TITULO);
+		g2.drawString("(" + cor + ")", 18 + g2.getFontMetrics(NOME).stringWidth(nome), 32);
+
+		// próximo passo: a coisa mais importante a fazer agora
+		g2.setColor(Color.WHITE);
+		g2.fillRoundRect(8, 44, getWidth() - 16, 30, 12, 12);
+		g2.setColor(Color.BLACK);
+		g2.setFont(PASSO);
+		g2.drawString("▶ " + proximoPasso(cor), 16, 64);
+
+		g2.setColor(Cores.texto(cor));
+		g2.setFont(TURNO);
+		if (jogo.turnoEmAndamento()) {
+			g2.drawString("Coluna " + jogo.colunaAtivada() + "   |   Movimentos: " + jogo.movimentosRestantes()
+					+ "   |   Tributos: " + jogo.acoesDeTributoRestantes(), 10, 98);
+			g2.setFont(TEXTO);
+			g2.drawString("Virtuais: " + jogo.moedasVirtuais() + " moeda, " + jogo.espadasVirtuais() + " espada, "
+					+ jogo.yurtsVirtuais() + " yurt" + (jogo.tesourosVirtuais().isEmpty() ? "" : ", tesouro " + jogo.tesourosVirtuais()), 10, 120);
+		} else if (jogo.quantidadeDePeoes(cor) > 1) {
+			g2.drawString("Altani joga com o peão " + (jogo.peaoAtivo(cor) + 1) + " (marcado com * no mapa)", 10, 98);
+		}
+	}
+
+	private String proximoPasso(String cor) {
+		if (jogo.precisaEscolherSecreto(cor)) {
+			return "Escolha o conselheiro secreto (janela de cartas)";
+		}
+		if (!jogo.turnoEmAndamento()) {
+			return "Clique numa coluna livre da cartela";
+		}
+		if (jogo.khanPendente()) {
+			return "Use o Khan antes de encerrar o turno";
+		}
+		if (jogo.melhoriasGratisPendentes() > 0) {
+			return "Linha completa: pegue a melhoria grátis";
+		}
+		return "Faça suas ações e encerre o turno";
+	}
+
+	/**
+	 * Uma linha por jogador: espadas, moedas, peças de yurt, tesouros, yurts
+	 * no estoque e votos, cada número centralizado sob o título da coluna.
+	 */
 	private void desenharQuadro(Graphics2D g2, int y) {
 		g2.setColor(Color.BLACK);
-		g2.setFont(NEGRITO);
-		g2.drawString("Jogador        Esp  Yurt  Moe  Tes  Yurts  Votos", 10, y);
+		g2.setFont(CABECALHO);
+		g2.drawString("Jogador", 10, y);
+		for (int i = 0; i < TITULOS.length; i++) {
+			centralizar(g2, TITULOS[i][0], CENTROS[i], y);
+			centralizar(g2, TITULOS[i][1], CENTROS[i], y + 13);
+		}
+		y += 13;
+		g2.drawLine(10, y + 4, getWidth() - 6, y + 4);
 		g2.setFont(TEXTO);
 		for (String cor : jogo.cores()) {
 			y += 20;
@@ -91,9 +137,11 @@ class PainelDaVez extends JPanel implements ObservadorIF {
 			g2.fillRect(10, y - 11, 12, 12);
 			g2.setColor(Color.BLACK);
 			g2.drawString(jogo.herdeiroDe(cor), 26, y);
-			g2.drawString(String.format("%3d   %3d   %3d   %3d    %3d    %3d", jogo.tributosDe(cor, "ESPADA"),
-					jogo.tributosDe(cor, "YURT"), jogo.tributosDe(cor, "MOEDA"), jogo.tesourosDe(cor),
-					jogo.yurtsDisponiveisDe(cor), jogo.votosDe(cor)), 110, y);
+			int[] valores = { jogo.tributosDe(cor, "ESPADA"), jogo.tributosDe(cor, "MOEDA"),
+					jogo.tributosDe(cor, "YURT"), jogo.tesourosDe(cor), jogo.yurtsDisponiveisDe(cor), jogo.votosDe(cor) };
+			for (int i = 0; i < valores.length; i++) {
+				centralizar(g2, String.valueOf(valores[i]), CENTROS[i], y);
+			}
 		}
 		y += 24;
 		g2.drawString("Kurultai: " + jogo.fichaNeutra() + " de " + jogo.limiteDoKurultai() + " votos", 10, y);
@@ -104,6 +152,10 @@ class PainelDaVez extends JPanel implements ObservadorIF {
 			g2.setFont(NEGRITO);
 			g2.drawString("Fim disparado: termine a rodada", 200, y);
 		}
+	}
+
+	private void centralizar(Graphics2D g2, String texto, int centro, int y) {
+		g2.drawString(texto, centro - g2.getFontMetrics().stringWidth(texto) / 2, y);
 	}
 
 	private void desenharResultado(Graphics2D g2) {

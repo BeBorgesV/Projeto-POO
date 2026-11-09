@@ -1,6 +1,7 @@
 package model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -77,5 +78,18 @@ public class YurtTest {
 	public void construirEmParadaNaoVisitadaNoTurnoLancaExcecao() {
 		vermelhoVaiParaP1();
 		jogo.construirYurt("P3");
+	}
+
+	@Test(timeout = DEFAULT_TIMEOUT)
+	public void paradasParaYurtSaoAsVisitadasComEspaco() {
+		vermelhoVaiParaP1(); // Karakorum (sem yurt) e P1
+		assertEquals("Paradas onde dá para construir", java.util.Arrays.asList("P1"), jogo.paradasParaYurt());
+	}
+
+	@Test(timeout = DEFAULT_TIMEOUT)
+	public void semPecaDeTributoDeYurtNaoHaParadaParaYurt() {
+		vermelho.gastarTributo(TipoTributo.YURT, 1);
+		vermelhoVaiParaP1();
+		assertTrue("Paradas sem ter peça de yurt", jogo.paradasParaYurt().isEmpty());
 	}
 }
