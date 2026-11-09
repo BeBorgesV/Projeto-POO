@@ -4,7 +4,7 @@ Trabalho de POO (prof. Ivan Mathias Filho), 2026.2.
 
 Integrantes:
 - Bernardo Borges Vieira - 2211838
-- Bruno Pestana - 2310763
+- Bruno Garcia Rangel Pestana - 2310763
 - Ian Siqueira Matielo Moura - 2310643
 
 Imagens originais do jogo: https://drive.google.com/drive/folders/17Jtg_bu90KbPdT2hoqx60qx4Oskz6ZYV?usp=sharing
