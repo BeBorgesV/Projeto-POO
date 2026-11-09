@@ -20,6 +20,8 @@ class Cidade implements AreaDoMapa {
 	private final List<TipoTesouro> tesouros = new ArrayList<>();
 	private boolean revelada;
 	private Jogador conquistador;
+	/** O conquistador pôs um yurt no meio da cidade (só se ainda tinha yurts). */
+	private boolean temYurtDoConquistador;
 
 	Cidade(String nome, Regiao regiao) {
 		this.nome = nome;
@@ -77,8 +79,14 @@ class Cidade implements AreaDoMapa {
 		return conquistador;
 	}
 
-	void registrarConquista(Jogador j) {
+	void registrarConquista(Jogador j, boolean comYurt) {
 		conquistador = j;
+		temYurtDoConquistador = comYurt;
+	}
+
+	/** O yurt do meio da cidade é deste jogador? Conta na maioria da região. */
+	boolean yurtDe(Jogador j) {
+		return temYurtDoConquistador && conquistador == j;
 	}
 
 	@Override

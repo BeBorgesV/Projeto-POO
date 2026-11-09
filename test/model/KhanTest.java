@@ -18,7 +18,7 @@ public class KhanTest {
 
 	@Before
 	public void criaPartidaEIniciaTurnoComKhan() {
-		jogo = new Jogo(new Random(42));
+		jogo = Jogo.reiniciarParaTeste(new Random(42));
 		jogo.iniciarPartida("VERMELHO", "AZUL");
 		jogo.iniciarTurno(0, 0, true);
 	}

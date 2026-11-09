@@ -28,13 +28,20 @@ class Parada {
 
 	private final String nome;
 	private final Tipo tipo;
+	/** Região da parada; null em Karakorum (não pertence a nenhuma região). */
+	private final Regiao regiao;
 	private final Set<Parada> vizinhas = new HashSet<>();
 	private final List<Jogador> peoes = new ArrayList<>();
 	private final List<Jogador> donosDosYurts = new ArrayList<>();
 
-	Parada(String nome, Tipo tipo) {
+	Parada(String nome, Tipo tipo, Regiao regiao) {
 		this.nome = nome;
 		this.tipo = tipo;
+		this.regiao = regiao;
+	}
+
+	Regiao regiao() {
+		return regiao;
 	}
 
 	String nome() {
@@ -102,6 +109,25 @@ class Parada {
 
 	int quantidadeDeYurts() {
 		return donosDosYurts.size();
+	}
+
+	int yurtsDe(Jogador j) {
+		int n = 0;
+		for (Jogador dono : donosDosYurts) {
+			if (dono == j) {
+				n++;
+			}
+		}
+		return n;
+	}
+
+	List<Jogador> donosDosYurts() {
+		return Collections.unmodifiableList(donosDosYurts);
+	}
+
+	/** Habilidade do Tolui: o único yurt que pode ficar em Karakorum. */
+	void colocarYurtDoTolui(Jogador tolui) {
+		donosDosYurts.add(tolui);
 	}
 
 	@Override

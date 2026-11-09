@@ -21,7 +21,7 @@ public class AtaqueCidadeTest {
 
 	@Before
 	public void vermelhoEmP1AoLadoDeSamarcandaComFerroEPele() {
-		jogo = new Jogo(new Random(42));
+		jogo = Jogo.reiniciarParaTeste(new Random(42));
 		jogo.iniciarPartida("VERMELHO", "AZUL");
 		vermelho = jogo.jogador("VERMELHO");
 		jogo.tabuleiro().revelarCidade("Samarcanda", Arrays.asList(TipoTesouro.FERRO, TipoTesouro.PELE));

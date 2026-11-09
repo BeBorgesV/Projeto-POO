@@ -20,7 +20,7 @@ public class MovimentoTest {
 
 	@Before
 	public void criaPartidaComVermelhoDaVezEmKarakorum() {
-		jogo = new Jogo(new Random(42));
+		jogo = Jogo.reiniciarParaTeste(new Random(42));
 		jogo.iniciarPartida("VERMELHO", "AZUL");
 		vermelho = jogo.jogador("VERMELHO");
 		azul = jogo.jogador("AZUL");
@@ -109,7 +109,7 @@ public class MovimentoTest {
 
 	@Test(timeout = DEFAULT_TIMEOUT, expected = JogadaInvalidaException.class)
 	public void paradaDuplaNaoAceitaTerceiroPeao() {
-		Jogo jogoDeTres = new Jogo(new Random(42));
+		Jogo jogoDeTres = Jogo.reiniciarParaTeste(new Random(42));
 		jogoDeTres.iniciarPartida("VERMELHO", "AZUL", "VERDE");
 		Parada p2 = jogoDeTres.tabuleiro().parada("P2");
 		jogoDeTres.jogador("AZUL").posicionarEm(p2);
@@ -117,5 +117,18 @@ public class MovimentoTest {
 		jogoDeTres.jogador("VERMELHO").posicionarEm(jogoDeTres.tabuleiro().parada("P1"));
 		jogoDeTres.iniciarTurno(1, 0, false);
 		jogoDeTres.mover("P2");
+	}
+
+	@Test(timeout = DEFAULT_TIMEOUT)
+	public void destinosDoPeaoSaoAsParadasVizinhas() {
+		jogo.iniciarTurno(1, 0, false);
+		assertEquals("Destinos a partir de Karakorum", java.util.Arrays.asList("P1", "P4"), jogo.destinosDoPeao());
+	}
+
+	@Test(timeout = DEFAULT_TIMEOUT)
+	public void ultimoMovimentoNaoMostraParadaOcupada() {
+		azul.posicionarEm(parada("P1"));
+		jogo.iniciarTurno(1, 0, false);
+		assertEquals("Destinos com P1 ocupada no último movimento", java.util.Arrays.asList("P4"), jogo.destinosDoPeao());
 	}
 }

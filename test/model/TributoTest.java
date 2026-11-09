@@ -15,7 +15,7 @@ public class TributoTest {
 
 	@Before
 	public void criaPartidaComDoisJogadores() {
-		jogo = new Jogo(new Random(42));
+		jogo = Jogo.reiniciarParaTeste(new Random(42));
 		jogo.iniciarPartida("VERMELHO", "AZUL");
 	}
 
